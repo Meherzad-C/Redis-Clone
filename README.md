@@ -1,1 +1,1 @@
-A lightweight but robust Redis clone.
+"WIP: This project is currently in the development stage"
