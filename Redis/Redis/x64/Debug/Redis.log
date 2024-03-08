@@ -1,0 +1,6 @@
+﻿  Application.cpp
+  Main.cpp
+  Application.h
+  Generating Code...
+x64\Debug\Application.obj : warning LNK4042: object specified more than once; extras ignored
+  Redis.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\x64\Debug\Redis.exe
