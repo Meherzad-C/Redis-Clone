@@ -143,13 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\TCP_Server.h" />
+    <ClInclude Include="Src\TCP_Server.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App\Application.cpp" />
     <ClCompile Include="App\Main.cpp" />
     <ClCompile Include="App\Application.h" />
-    <ClCompile Include="src\TCP_Server.cpp" />
+    <ClCompile Include="Src\TCP_Server.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

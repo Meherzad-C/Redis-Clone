@@ -1,6 +1,9 @@
 ﻿  Application.cpp
   Main.cpp
   Application.h
+  TCP_Server.cpp
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(136,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(156,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   Generating Code...
 x64\Debug\Application.obj : warning LNK4042: object specified more than once; extras ignored
   Redis.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\x64\Debug\Redis.exe

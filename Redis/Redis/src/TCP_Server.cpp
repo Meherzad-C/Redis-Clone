@@ -129,21 +129,60 @@ void TCP_Server::Die(const char* msg)
 	exit(EXIT_FAILURE);
 }
 
+int32_t TCP_Server::ReadFull(SOCKET fd, char* buff, size_t n)
+{
+	while (n > 0)
+	{
+		size_t rv = recv(fd, buff, n, 0);
+		if (rv <= 0)
+		{
+			std::cout << "ReadFull(): " << WSAGetLastError() << std::endl;
+			return -1;
+		}
+		
+		assert(static_cast<size_t>(rv) <= n);
+
+		n -= static_cast<size_t>(rv);
+		buff += rv;
+	}
+
+	return 0;
+}
+
+int32_t TCP_Server::WriteFull(SOCKET fd, const char* buff, size_t n)
+{
+	while (n > 0) 
+	{
+		size_t rv = send(fd, buff, n, 0);
+		if (rv <= 0) {
+			std::cout << "WriteFull(): " << WSAGetLastError() << std::endl;
+			return -1;
+		}
+
+		assert(static_cast<size_t>(rv) <= n);
+
+		n -= static_cast<size_t>(rv);
+		buff += rv;
+	}
+	return 0;
+}
+
 int32_t TCP_Server::OneRequest(SOCKET connfd)
-{	
+{
 	// 4 bytes for header, kMaxSize for actual message, 1 byte for null terminator
 	char rbuff[4 + kMaxSize + 1];
-
-	errno = 0;
-	int32_t err = ReadFull(connfd, rbuff, sizeof(rbuff));
+	//memcpy(rbuff, 0, sizeof(rbuff));
+	int getError = WSAGetLastError();
+	int32_t err = ReadFull(connfd, rbuff, 4);
 	if (err)
 	{
-		if (errno == 0)
+		if (getError == 0)
 		{
 			Msg("EOF");
 		}
 		else
 		{
+			std::cout << "Error at OneRequest(): " << WSAGetLastError() << std::endl;
 			Msg("read() error");
 		}
 		return err;
@@ -165,7 +204,8 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 	}
 
 	rbuff[4 + len] = '\0';
-	std::cout << "Client says: " << rbuff[4] << std::endl;
+	std::cout << "Client says: " << &rbuff[4] << std::endl;
+	printf("client says: %s\n", &rbuff[4]);
 
 	const char reply[] = "World";
 	char wbuff[4 + sizeof(reply)];
@@ -174,40 +214,4 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 	memcpy(&wbuff[4], reply, len);
 
 	return WriteFull(connfd, wbuff, 4 + len);
-}
-
-int32_t TCP_Server::ReadFull(SOCKET fd, char* buff, size_t n)
-{
-	while (n > 0)
-	{
-		size_t rv = recv(fd, buff, n, 0);
-		if (rv <= 0)
-		{
-			return -1;
-		}
-		
-		assert(static_cast<size_t>(rv) <= n);
-
-		n -= static_cast<size_t>(rv);
-		buff += rv;
-	}
-
-	return 0;
-}
-
-int32_t TCP_Server::WriteFull(SOCKET fd, const char* buff, size_t n)
-{
-	while (n > 0) 
-	{
-		size_t rv = send(fd, buff, n, 0);
-		if (rv <= 0) {
-			return -1;
-		}
-
-		assert(static_cast<size_t>(rv) <= n);
-
-		n -= static_cast<size_t>(rv);
-		buff += rv;
-	}
-	return 0;
 }

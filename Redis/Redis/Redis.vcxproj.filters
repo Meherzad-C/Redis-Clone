@@ -15,12 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\TCP_Server.h">
+    <ClInclude Include="Src\TCP_Server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\TCP_Server.cpp">
+    <ClCompile Include="Src\TCP_Server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="App\Main.cpp">

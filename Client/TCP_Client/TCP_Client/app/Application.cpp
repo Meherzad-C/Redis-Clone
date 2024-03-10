@@ -32,13 +32,31 @@ void Application::Run()
 
 void Application::InitilizeClient()
 {
-	TCPClient client;
+	TCP_Client client;
 	client.ConnectToServer(IP_ADDRESS, PORT);
 
-	const char* message = "hello";
+	/*const char* message = "hello";
 	client.Send_Message(message);
 
 	char rbuf[64] = {};
 	client.Receive_Message(rbuf, sizeof(rbuf));
-	std::cout << "server says: " << rbuf << std::endl;
+	std::cout << "server says: " << rbuf << std::endl;*/
+
+	int err = client.QueryServer(client.GetSocket(), "hello1");
+	if (err)
+	{
+		std::cout << "Query1 failed " << std::endl;
+	}
+
+	err = client.QueryServer(client.GetSocket(), "hello2");
+	if (err)
+	{
+		std::cout << "Query2 failed " << std::endl;
+	}
+
+	err = client.QueryServer(client.GetSocket(), "hello3");
+	if (err)
+	{
+		std::cout << "Query3 failed " << std::endl;
+	}
 }
