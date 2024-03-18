@@ -103,6 +103,17 @@ void TCP_Server::HandleConnections()
 
 }
 
+void TCP_Server::SetNonBlockingFD(SOCKET fd)
+{
+	u_long mode = 1;					// 0 for blocking, 1 for non-blocking
+	int result = ioctlsocket(fd, FIONBIO, &mode);
+
+	if (result == SOCKET_ERROR)
+	{
+		std::cerr << "ioctlsocket() error, " << WSAGetLastError() << std::endl;
+	}
+}
+
 void TCP_Server::DoSomething(SOCKET connfd)
 {
 	char rbuf[64] = {};
@@ -115,6 +126,63 @@ void TCP_Server::DoSomething(SOCKET connfd)
 
 	const char wbuf[] = "world";
 	send(connfd, wbuf, sizeof(wbuf), 0);
+}
+
+bool TCP_Server::TryOneRequest(Conn* conn)
+{
+	// Try to parse a request from the buffer
+	if (conn->rbuff_size < 4)
+	{
+		return false;
+	}
+	uint32_t len;
+
+	memcpy(&len, &conn->rbuff[0], 4);
+	if (len > kMaxSize)
+	{
+		Msg("Message too long");
+		conn->state = STATE_END;
+		return false;
+	}
+
+	if (4 + len > conn->rbuff_size)
+	{
+		// not enough data in the buffer. Will retry in the next iteration
+		return false;
+	}
+
+	// got one request, do something with it
+	printf("client says: %.*s\n", len, &conn->rbuff[4]);
+
+	// generating echoing response
+	memcpy(&conn->wbuff[0], &len, 4);
+	memcpy(&conn->wbuff[4], &conn->rbuff[4], len);
+	conn->wbuff_size = 4 + len;
+
+	size_t remain = conn->rbuff_size - 4 - len;
+	if (remain) {
+		memmove(conn->rbuff, &conn->rbuff[4 + len], remain);
+	}
+	conn->rbuff_size = remain;
+
+	// change state
+	conn->state = STATE_RESPONSE;
+	StateResponse(conn);
+
+	// continue the outer loop if the request was fully processed
+	return (conn->state == STATE_REQUEST);
+
+	return true;
+}
+
+void TCP_Server::StateRequest(Conn* conn)
+{
+	while (TryFillBuffer(conn)) {}
+}
+
+void TCP_Server::StateResponse(Conn* conn)
+{
+	while (TryFlushBuffer(conn)) {}
 }
 
 void TCP_Server::Msg(const char* msg)
