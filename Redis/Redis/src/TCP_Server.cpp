@@ -171,8 +171,6 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 
 	// continue the outer loop if the request was fully processed
 	return (conn->state == STATE_REQUEST);
-
-	return true;
 }
 
 void TCP_Server::StateRequest(Conn* conn)
@@ -183,6 +181,60 @@ void TCP_Server::StateRequest(Conn* conn)
 void TCP_Server::StateResponse(Conn* conn)
 {
 	while (TryFlushBuffer(conn)) {}
+}
+
+bool TCP_Server::TryFillBuffer(Conn* conn)
+{
+	// Try to fill the buffer
+	assert(conn->rbuff_size < sizeof(conn->rbuff));
+	size_t rv = 0;
+
+	do
+	{
+		size_t cap = sizeof(conn->rbuff) - conn->rbuff_size;
+		rv = recv(conn->fd, reinterpret_cast<char*>(&conn->rbuff[conn->rbuff_size]), cap, 0);
+
+	} while (rv < 0 && WSAGetLastError() == WSAEINTR);
+
+	if (rv < 0 && WSAGetLastError() == WSAEWOULDBLOCK)
+	{
+		return false;
+	}
+
+	if (rv < 0)
+	{
+		Msg("recv() error");
+		conn->state = STATE_END;
+		return false;
+	}
+	if (rv == 0)
+	{
+		if (conn->rbuff_size > 0)
+		{
+			Msg("Unexpected EOF");
+		}
+		else
+		{
+			Msg("EOF");
+		}
+		conn->state = STATE_END;
+		return false;
+	}
+	conn->rbuff_size += (size_t)rv;
+	assert(conn->rbuff_size <= sizeof(conn->rbuff));
+
+	while (TryOneRequest(conn)) {}
+
+	return (conn->state == STATE_REQUEST);
+}
+
+bool TCP_Server::TryFlushBuffer(Conn* conn)
+{
+	return false;
+}
+
+void TCP_Server::Connection_IO(Conn* conn)
+{
 }
 
 void TCP_Server::Msg(const char* msg)
