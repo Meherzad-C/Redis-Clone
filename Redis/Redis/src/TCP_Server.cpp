@@ -294,6 +294,39 @@ void TCP_Server::Connection_IO(Conn* conn)
 	}
 }
 
+int32_t TCP_Server::AcceptNewConnection(std::vector<Conn*>& fd2conn, int fd)
+{
+	struct sockaddr_in clientAddr = {};
+	int clientAddrLen = sizeof(clientAddr);
+	SOCKET connfd = accept(fd, reinterpret_cast<sockaddr*>(&clientAddr), &clientAddrLen);
+
+	if (connfd == INVALID_SOCKET)
+	{
+		Msg("accept() error");
+		return -1;
+	}
+	
+	SetNonBlockingFD(connfd);
+
+	Conn* conn = (Conn*)malloc(sizeof(Conn));
+
+	if (!conn)
+	{
+		closesocket(connfd);
+		return -1;
+	}
+
+	conn->fd = connfd;
+	conn->state = STATE_REQUEST;
+	conn->rbuff_size = 0;
+	conn->wbuff_size = 0;
+	conn->wbuff_sent = 0;
+
+	ConnPut(fd2conn, conn);
+
+	return 0;
+}
+
 void TCP_Server::Msg(const char* msg)
 {
 	fprintf(stderr, "%s\n", msg);

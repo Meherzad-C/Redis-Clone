@@ -39,20 +39,19 @@ private:
     void BindSocket();
     void ListenForConnections();
     void HandleConnections();
-    void SetNonBlockingFD(SOCKET fd);
     void DoSomething(SOCKET connfd);
-    void ConnPut(std::vector<Conn*>& fd2conn, Conn* conn);
     bool TryOneRequest(Conn* conn);
     void StateRequest(Conn* conn);
     void StateResponse(Conn* conn);
     bool TryFillBuffer(Conn* conn);
     bool TryFlushBuffer(Conn* conn);
     void Connection_IO(Conn* conn);
+    static void SetNonBlockingFD(SOCKET fd);
+    static void ConnPut(std::vector<Conn*>& fd2conn, Conn* conn);
     static int32_t AcceptNewConnection(std::vector<Conn*>& fd2conn, int fd);
     static int32_t OneRequest(SOCKET connfd);
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteFull(SOCKET fd, const char* buff, size_t n);
-    
     static void Msg(const char* msg);
     static void Die(const char* msg);
 
