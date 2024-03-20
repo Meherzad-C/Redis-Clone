@@ -128,6 +128,16 @@ void TCP_Server::DoSomething(SOCKET connfd)
 	send(connfd, wbuf, sizeof(wbuf), 0);
 }
 
+void TCP_Server::ConnPut(std::vector<Conn*>& fd2conn, Conn* conn)
+{
+	if (fd2conn.size() <= static_cast<size_t>(conn->fd))
+	{
+		fd2conn.resize(conn->fd + 1);
+	}
+
+	fd2conn[conn->fd] = conn;
+}
+
 bool TCP_Server::TryOneRequest(Conn* conn)
 {
 	// Try to parse a request from the buffer
@@ -220,7 +230,7 @@ bool TCP_Server::TryFillBuffer(Conn* conn)
 		conn->state = STATE_END;
 		return false;
 	}
-	conn->rbuff_size += (size_t)rv;
+	conn->rbuff_size += rv;
 	assert(conn->rbuff_size <= sizeof(conn->rbuff));
 
 	while (TryOneRequest(conn)) {}
@@ -230,11 +240,58 @@ bool TCP_Server::TryFillBuffer(Conn* conn)
 
 bool TCP_Server::TryFlushBuffer(Conn* conn)
 {
-	return false;
+	size_t rv = 0;
+
+	do
+	{
+		size_t remaining = conn->wbuff_size - conn->wbuff_sent;
+		rv = send(conn->fd, reinterpret_cast<const char*>(&conn->wbuff[conn->wbuff_sent]), remaining, 0);
+	} while (rv < 0 && WSAGetLastError() == WSAEINTR);
+
+	if (rv < 0 && WSAGetLastError() == WSAEWOULDBLOCK)
+	{
+		return false;
+	}
+
+	if (rv < 0)
+	{
+		int error = WSAGetLastError();
+		fprintf(stderr, "send() error %d\n", error);
+		conn->state = STATE_END;
+		return false;
+	}
+
+	conn->wbuff_size += rv;
+	assert(conn->wbuff_sent <= conn->wbuff_size);
+
+	if (conn->rbuff_size == conn->wbuff_size)
+	{
+		conn->wbuff_sent = 0;
+		conn->wbuff_size = 0;
+		conn->state = STATE_REQUEST;
+		return false;
+	}
+
+	return true;
 }
 
 void TCP_Server::Connection_IO(Conn* conn)
 {
+	if (conn->state == STATE_REQUEST)
+	{
+		StateRequest(conn);
+	}
+
+	if (conn->state == STATE_RESPONSE)
+	{
+		StateResponse(conn);
+	}
+	
+	else
+	{
+		// not expected
+		assert(0);
+	}
 }
 
 void TCP_Server::Msg(const char* msg)

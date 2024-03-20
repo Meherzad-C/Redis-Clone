@@ -13,6 +13,7 @@ private:
 	int port;
 	SOCKET fd;
     static const size_t kMaxSize{ 4096 };
+    std::vector<struct Conn*> fd2conn;
 
     enum
     {
@@ -32,7 +33,6 @@ private:
         uint8_t wbuff[4 + kMaxSize];
     }Conn;
 
-    std::vector<struct Conn*> fd2conn;
 
 private:
     void SetupSocket();
@@ -52,7 +52,7 @@ private:
     static int32_t OneRequest(SOCKET connfd);
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteFull(SOCKET fd, const char* buff, size_t n);
-
+    
     static void Msg(const char* msg);
     static void Die(const char* msg);
 
