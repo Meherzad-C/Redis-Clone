@@ -1,7 +1,7 @@
 #include "Application.h"
 
 #define IP_ADDRESS "127.0.0.1"
-#define PORT 1234
+#define PORT 5000
 
 // ==============================
 //	Constructors and Destructors
@@ -33,30 +33,33 @@ void Application::Run()
 void Application::InitilizeClient()
 {
 	TCP_Client client;
-	client.ConnectToServer(IP_ADDRESS, PORT);
-
-	/*const char* message = "hello";
-	client.Send_Message(message);
-
-	char rbuf[64] = {};
-	client.Receive_Message(rbuf, sizeof(rbuf));
-	std::cout << "server says: " << rbuf << std::endl;*/
-
-	int err = client.QueryServer(client.GetSocket(), "hello1");
-	if (err)
+	
+	if (!client.ConnectToServer(IP_ADDRESS, PORT))
 	{
-		std::cout << "Query1 failed " << std::endl;
+		std::cerr << "Unable to connect to server, quitting..." << std::endl;
+		return;
 	}
 
-	err = client.QueryServer(client.GetSocket(), "hello2");
-	if (err)
+	SOCKET fd = client.GetSocket();
+	const char* queryList[3] = { "hello1", "hello2", "hello3" };
+
+	for (int i = 0; i < 3; ++i)
 	{
-		std::cout << "Query2 failed " << std::endl;
+		int err = client.SendRequest(fd, queryList[i]);
+		if (err != 0)
+		{
+			std::cerr << "Falied to SendRequest()" << std::endl;
+			return;
+		}
 	}
 
-	err = client.QueryServer(client.GetSocket(), "hello3");
-	if (err)
+	for (int i = 0; i < 3; ++i)
 	{
-		std::cout << "Query3 failed " << std::endl;
+		int err = client.ReadRequest(fd);
+		if (err != 0)
+		{
+			std::cerr << "Failed to ReadRequest()" << std::endl;
+			return;
+		}
 	}
 }

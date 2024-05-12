@@ -1,24 +1,11 @@
-﻿  Application.h
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\TCP_Server.h(24,24): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\TCP_Server.h(25,23): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\TCP_Server.h(26,24): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\TCP_Server.h(27,24): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\TCP_Server.h(28,25): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\TCP_Server.h(29,24): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\TCP_Server.h(46,5): error C5208: unnamed class used in typedef name cannot declare members other than non-static data members, member enumerations, or member classes
+﻿  Application.cpp
+  Application.h
+  Main.cpp
   TCP_Server.cpp
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(24,24): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(25,23): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(26,24): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(27,24): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(28,25): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(29,24): error C2061: syntax error: identifier 'Conn'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(46,5): error C5208: unnamed class used in typedef name cannot declare members other than non-static data members, member enumerations, or member classes
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(131,18): error C2511: 'bool TCP_Server::TryOneRequest(TCP_Server::Conn *)': overloaded member function not found in 'TCP_Server'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(10,7): message : see declaration of 'TCP_Server'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(170,2): error C2660: 'TCP_Server::StateResponse': function does not take 1 arguments
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.h(26,10): message : see declaration of 'TCP_Server::StateResponse'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(170,2): message : while trying to match the argument list '(TCP_Server::Conn *)'
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(194,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(214,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(144,33): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(265,86): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(308,98): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(406,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(426,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   Generating Code...
+  Redis.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\x64\Debug\Redis.exe

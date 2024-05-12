@@ -17,15 +17,18 @@ private:
     static void Msg(const char* msg);
 
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
-    static int32_t WriteFull(SOCKET fd, const char* buff, size_t n);
+    static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
 
 public:
     TCP_Client();
     ~TCP_Client();
 
     SOCKET GetSocket() const;
-    void ConnectToServer(const char* serverAddress, int port);
+    bool ConnectToServer(const char* serverAddress, int port);
     void Send_Message(const char* message);
     void Receive_Message(char* buffer, size_t bufferSize);
     static int32_t QueryServer(SOCKET fd, const char* text);
+    // The QueryServer() is simply broken into SendRequest() and ReadRequest()
+    static int32_t SendRequest(SOCKET fd, const char* text);
+    static int32_t ReadRequest(SOCKET fd);
 };

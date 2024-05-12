@@ -1,6 +1,6 @@
 #include "Application.h"
 
-#define PORT 1234
+#define PORT 5000
 
 // ==============================
 //	Constructors and Destructors

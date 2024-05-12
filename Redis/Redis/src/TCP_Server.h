@@ -13,7 +13,6 @@ private:
 	int port;
 	SOCKET fd;
     static const size_t kMaxSize{ 4096 };
-    std::vector<struct Conn*> fd2conn;
 
     enum
     {
@@ -22,7 +21,7 @@ private:
         STATE_END = 2
     };
 
-    typedef struct
+    typedef struct Conn
     {
         SOCKET fd = INVALID_SOCKET;
         uint32_t state = 0;
@@ -33,12 +32,14 @@ private:
         uint8_t wbuff[4 + kMaxSize];
     }Conn;
 
+    std::vector<Conn*> fd2conn;
 
 private:
     void SetupSocket();
     void BindSocket();
     void ListenForConnections();
-    void HandleConnections();
+    void HandleConnections();           // not in use now.
+    void HandleConnections2();
     void DoSomething(SOCKET connfd);
     bool TryOneRequest(Conn* conn);
     void StateRequest(Conn* conn);
@@ -51,7 +52,7 @@ private:
     static int32_t AcceptNewConnection(std::vector<Conn*>& fd2conn, int fd);
     static int32_t OneRequest(SOCKET connfd);
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
-    static int32_t WriteFull(SOCKET fd, const char* buff, size_t n);
+    static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
     static void Msg(const char* msg);
     static void Die(const char* msg);
 

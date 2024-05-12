@@ -28,7 +28,8 @@ TCP_Server::~TCP_Server()
 
 void TCP_Server::Start()
 {
-	HandleConnections();
+	//HandleConnections();
+	HandleConnections2();
 }
 
 // ==============================
@@ -74,6 +75,8 @@ void TCP_Server::ListenForConnections()
 	{
 		Die("listen() failed");
 	}
+
+	SetNonBlockingFD(this->fd);
 }
 
 void TCP_Server::HandleConnections()
@@ -101,6 +104,63 @@ void TCP_Server::HandleConnections()
 		closesocket(connfd);
 	}
 
+}
+
+void TCP_Server::HandleConnections2()
+{
+	SetNonBlockingFD(this->fd);
+
+	while (true)
+	{
+		fd_set fdset;
+		FD_ZERO(&fdset);
+		FD_SET(this->fd, &fdset);
+
+		for (const auto& pConn : this->fd2conn)
+		{
+			if (pConn)
+			{
+				FD_SET(pConn->fd, &fdset);
+			}
+		}
+
+		timeval timeout;
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+
+		int rv = select(0, &fdset, nullptr, nullptr, &timeout);
+		if (rv == SOCKET_ERROR)
+		{
+			Die("select()");
+		}
+
+		if (rv == 0)
+		{
+			continue;
+		}
+
+		if (FD_ISSET(fd, &fdset))
+		{
+			AcceptNewConnection(fd2conn, fd);
+		}
+
+		for (const auto& pConn : this->fd2conn)
+		{
+			if (pConn)
+			{
+				if (pConn && FD_ISSET(pConn->fd, &fdset))
+				{
+					Connection_IO(pConn);
+				}
+
+				if (pConn->state == STATE_END)
+				{
+					closesocket(pConn->fd);
+					delete pConn;
+				}
+			}
+		}
+	}
 }
 
 void TCP_Server::SetNonBlockingFD(SOCKET fd)
@@ -359,13 +419,13 @@ int32_t TCP_Server::ReadFull(SOCKET fd, char* buff, size_t n)
 	return 0;
 }
 
-int32_t TCP_Server::WriteFull(SOCKET fd, const char* buff, size_t n)
+int32_t TCP_Server::WriteAll(SOCKET fd, const char* buff, size_t n)
 {
 	while (n > 0) 
 	{
 		size_t rv = send(fd, buff, n, 0);
 		if (rv <= 0) {
-			std::cout << "WriteFull(): " << WSAGetLastError() << std::endl;
+			std::cout << "WriteAll(): " << WSAGetLastError() << std::endl;
 			return -1;
 		}
 
@@ -423,5 +483,5 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 	memcpy(wbuff, &len, 4);
 	memcpy(&wbuff[4], reply, len);
 
-	return WriteFull(connfd, wbuff, 4 + len);
+	return WriteAll(connfd, wbuff, 4 + len);
 }
