@@ -128,6 +128,8 @@ void TCP_Server::HandleConnections2()
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;
 
+		// The select function determines the status of one or more sockets, 
+		// waiting if necessary, to perform synchronous I/O.
 		int rv = select(0, &fdset, nullptr, nullptr, &timeout);
 		if (rv == SOCKET_ERROR)
 		{
@@ -139,9 +141,9 @@ void TCP_Server::HandleConnections2()
 			continue;
 		}
 
-		if (FD_ISSET(fd, &fdset))
+		if (FD_ISSET(this->fd, &fdset))
 		{
-			AcceptNewConnection(fd2conn, fd);
+			AcceptNewConnection(fd2conn, this->fd);
 		}
 
 		for (const auto& pConn : this->fd2conn)
@@ -203,9 +205,11 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 	// Try to parse a request from the buffer
 	if (conn->rbuff_size < 4)
 	{
+		// not enough data in the buffer. 
+		// Will retry in the next iteration
 		return false;
 	}
-	uint32_t len;
+	uint32_t len = 0;
 
 	memcpy(&len, &conn->rbuff[0], 4);
 	if (len > kMaxSize)
@@ -256,13 +260,18 @@ void TCP_Server::StateResponse(Conn* conn)
 bool TCP_Server::TryFillBuffer(Conn* conn)
 {
 	// Try to fill the buffer
+
 	assert(conn->rbuff_size < sizeof(conn->rbuff));
-	size_t rv = 0;
+	SSIZE_T rv = 0;
 
 	do
 	{
+		std::cout << "rbuff: " << conn->rbuff[conn->rbuff_size] << std::endl;
+		std::cout << "sizeof(conn->rbuff): " << sizeof(conn->rbuff) << std::endl;
 		size_t cap = sizeof(conn->rbuff) - conn->rbuff_size;
-		rv = recv(conn->fd, reinterpret_cast<char*>(&conn->rbuff[conn->rbuff_size]), cap, 0);
+		rv = recv(conn->fd, (char*)&conn->rbuff[conn->rbuff_size], cap, 0);
+		// Debug
+		std::cout << "rv: " << rv << std::endl;
 
 	} while (rv < 0 && WSAGetLastError() == WSAEINTR);
 
@@ -290,7 +299,8 @@ bool TCP_Server::TryFillBuffer(Conn* conn)
 		conn->state = STATE_END;
 		return false;
 	}
-	conn->rbuff_size += rv;
+	conn->rbuff_size += (size_t)rv;
+
 	assert(conn->rbuff_size <= sizeof(conn->rbuff));
 
 	while (TryOneRequest(conn)) {}
@@ -322,6 +332,7 @@ bool TCP_Server::TryFlushBuffer(Conn* conn)
 	}
 
 	conn->wbuff_size += rv;
+	
 	assert(conn->wbuff_sent <= conn->wbuff_size);
 
 	if (conn->rbuff_size == conn->wbuff_size)
@@ -409,7 +420,7 @@ int32_t TCP_Server::ReadFull(SOCKET fd, char* buff, size_t n)
 			std::cout << "ReadFull(): " << WSAGetLastError() << std::endl;
 			return -1;
 		}
-		
+
 		assert(static_cast<size_t>(rv) <= n);
 
 		n -= static_cast<size_t>(rv);
@@ -428,7 +439,7 @@ int32_t TCP_Server::WriteAll(SOCKET fd, const char* buff, size_t n)
 			std::cout << "WriteAll(): " << WSAGetLastError() << std::endl;
 			return -1;
 		}
-
+		
 		assert(static_cast<size_t>(rv) <= n);
 
 		n -= static_cast<size_t>(rv);

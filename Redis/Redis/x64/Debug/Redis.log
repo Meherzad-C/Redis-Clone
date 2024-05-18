@@ -1,11 +1,7 @@
-﻿  Application.cpp
-  Application.h
-  Main.cpp
-  TCP_Server.cpp
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(144,33): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(265,86): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(308,98): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(406,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(426,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Generating Code...
+﻿  TCP_Server.cpp
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(146,37): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(272,68): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(318,98): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(417,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(437,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   Redis.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\x64\Debug\Redis.exe

@@ -185,6 +185,7 @@ int32_t TCP_Client::SendRequest(SOCKET fd, const char* text)
 {
 	uint32_t len = static_cast<uint32_t>(strlen(text));
 	
+	// do not overflow
 	if (len > kMaxSize)
 	{
 		Msg("Error SendingRequest()");
@@ -200,6 +201,7 @@ int32_t TCP_Client::SendRequest(SOCKET fd, const char* text)
 
 int32_t TCP_Client::ReadRequest(SOCKET fd)
 {
+	// 4=len, kMaxSize=sizeof Message, 1=string delimiter
 	char rbuff[4 + kMaxSize + 1];
 	
 	int err = ReadFull(fd, rbuff, 4);
