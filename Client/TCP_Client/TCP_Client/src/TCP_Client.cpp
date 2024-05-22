@@ -246,7 +246,7 @@ int32_t TCP_Client::ReadRequest(SOCKET fd)
 
 	// Do something
 	rbuff[4 + len] = '\0';
-	std::cout << "Server says-> " << &rbuff[4] << std::endl;
+	std::cout << "Server says: " << &rbuff[4] << std::endl;
 
 	return 0;
 }

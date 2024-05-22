@@ -152,7 +152,7 @@ void TCP_Server::HandleConnections2()
 			{
 				if (pConn && FD_ISSET(pConn->fd, &fdset))
 				{
-					Connection_IO(pConn);
+					ConnectionIO(pConn);
 				}
 
 				if (pConn->state == STATE_END)
@@ -200,13 +200,23 @@ void TCP_Server::ConnPut(std::vector<Conn*>& fd2conn, Conn* conn)
 	fd2conn[conn->fd] = conn;
 }
 
+void TCP_Server::StateRequest(Conn* conn)
+{
+	while (TryFillBuffer(conn)) {}
+}
+
+void TCP_Server::StateResponse(Conn* conn)
+{
+	while (TryFlushBuffer(conn)) {}
+}
+
 bool TCP_Server::TryOneRequest(Conn* conn)
 {
 	// Try to parse a request from the buffer
 	if (conn->rbuff_size < 4)
 	{
-		// not enough data in the buffer. 
-		// Will retry in the next iteration
+		// not enough data in the buffer,
+		// will retry in the next iteration
 		return false;
 	}
 	uint32_t len = 0;
@@ -221,7 +231,8 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 
 	if (4 + len > conn->rbuff_size)
 	{
-		// not enough data in the buffer. Will retry in the next iteration
+		// not enough data in the buffer, 
+		// will retry in the next iteration
 		return false;
 	}
 
@@ -247,16 +258,6 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 	return (conn->state == STATE_REQUEST);
 }
 
-void TCP_Server::StateRequest(Conn* conn)
-{
-	while (TryFillBuffer(conn)) {}
-}
-
-void TCP_Server::StateResponse(Conn* conn)
-{
-	while (TryFlushBuffer(conn)) {}
-}
-
 bool TCP_Server::TryFillBuffer(Conn* conn)
 {
 	// Try to fill the buffer
@@ -266,12 +267,8 @@ bool TCP_Server::TryFillBuffer(Conn* conn)
 
 	do
 	{
-		std::cout << "rbuff: " << conn->rbuff[conn->rbuff_size] << std::endl;
-		std::cout << "sizeof(conn->rbuff): " << sizeof(conn->rbuff) << std::endl;
 		size_t cap = sizeof(conn->rbuff) - conn->rbuff_size;
 		rv = recv(conn->fd, (char*)&conn->rbuff[conn->rbuff_size], cap, 0);
-		// Debug
-		std::cout << "rv: " << rv << std::endl;
 
 	} while (rv < 0 && WSAGetLastError() == WSAEINTR);
 
@@ -310,12 +307,12 @@ bool TCP_Server::TryFillBuffer(Conn* conn)
 
 bool TCP_Server::TryFlushBuffer(Conn* conn)
 {
-	size_t rv = 0;
+	SSIZE_T rv = 0;
 
 	do
 	{
 		size_t remaining = conn->wbuff_size - conn->wbuff_sent;
-		rv = send(conn->fd, reinterpret_cast<const char*>(&conn->wbuff[conn->wbuff_sent]), remaining, 0);
+		rv = send(conn->fd, (char*)(&conn->wbuff[conn->wbuff_sent]), remaining, 0);
 	} while (rv < 0 && WSAGetLastError() == WSAEINTR);
 
 	if (rv < 0 && WSAGetLastError() == WSAEWOULDBLOCK)
@@ -331,11 +328,11 @@ bool TCP_Server::TryFlushBuffer(Conn* conn)
 		return false;
 	}
 
-	conn->wbuff_size += rv;
+	conn->wbuff_sent += (size_t)rv;
 	
 	assert(conn->wbuff_sent <= conn->wbuff_size);
 
-	if (conn->rbuff_size == conn->wbuff_size)
+	if (conn->wbuff_sent == conn->wbuff_size)
 	{
 		conn->wbuff_sent = 0;
 		conn->wbuff_size = 0;
@@ -346,7 +343,7 @@ bool TCP_Server::TryFlushBuffer(Conn* conn)
 	return true;
 }
 
-void TCP_Server::Connection_IO(Conn* conn)
+void TCP_Server::ConnectionIO(Conn* conn)
 {
 	if (conn->state == STATE_REQUEST)
 	{
@@ -360,8 +357,7 @@ void TCP_Server::Connection_IO(Conn* conn)
 	
 	else
 	{
-		// not expected
-		assert(0);
+		assert(0);	// not expected
 	}
 }
 
@@ -377,8 +373,10 @@ int32_t TCP_Server::AcceptNewConnection(std::vector<Conn*>& fd2conn, int fd)
 		return -1;
 	}
 	
+	// set the new connection fd to nonblocking mode
 	SetNonBlockingFD(connfd);
 
+	// creating the struct Conn
 	Conn* conn = (Conn*)malloc(sizeof(Conn));
 
 	if (!conn)

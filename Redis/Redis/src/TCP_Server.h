@@ -25,8 +25,10 @@ private:
     {
         SOCKET fd = INVALID_SOCKET;
         uint32_t state = 0;
+        // buffer for reading
         size_t rbuff_size = 0;
         uint8_t rbuff[4 + kMaxSize];
+        // buffer for writing
         size_t wbuff_size = 0;
         size_t wbuff_sent = 0;
         uint8_t wbuff[4 + kMaxSize];
@@ -46,7 +48,7 @@ private:
     void StateResponse(Conn* conn);
     bool TryFillBuffer(Conn* conn);
     bool TryFlushBuffer(Conn* conn);
-    void Connection_IO(Conn* conn);
+    void ConnectionIO(Conn* conn);
     static void SetNonBlockingFD(SOCKET fd);
     static void ConnPut(std::vector<Conn*>& fd2conn, Conn* conn);
     static int32_t AcceptNewConnection(std::vector<Conn*>& fd2conn, int fd);
