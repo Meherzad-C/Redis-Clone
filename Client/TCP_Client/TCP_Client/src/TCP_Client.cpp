@@ -148,7 +148,7 @@ void TCP_Client::Die(const char* msg)
 int32_t TCP_Client::ReadFull(SOCKET fd, char* buff, size_t n)
 {
 	while (n > 0) {
-		size_t rv = recv(fd, buff, n, 0);
+		SSIZE_T rv = recv(fd, buff, n, 0);
 		if (rv <= 0) {
 			return -1;
 		}
@@ -163,7 +163,7 @@ int32_t TCP_Client::WriteAll(SOCKET fd, const char* buff, size_t n)
 {
 	while (n > 0)
 	{
-		size_t rv = send(fd, buff, n, 0);
+		SSIZE_T rv = send(fd, buff, n, 0);
 		if (rv <= 0)
 		{
 			std::cout << "WriteFull(): " << WSAGetLastError() << std::endl;
