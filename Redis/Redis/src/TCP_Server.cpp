@@ -112,15 +112,33 @@ void TCP_Server::HandleConnections2()
 
 	while (true)
 	{
-		fd_set fdset;
-		FD_ZERO(&fdset);
-		FD_SET(this->fd, &fdset);
+		fd_set readfds, writefds, exceptfds;
+		FD_ZERO(&readfds);
+		FD_ZERO(&writefds);
+		FD_ZERO(&exceptfds);
 
+		FD_SET(this->fd, &readfds);
+		FD_SET(this->fd, &exceptfds);
+
+		SOCKET maxfd = this->fd;
 		for (const auto& pConn : this->fd2conn)
 		{
-			if (pConn)
+			if (!pConn)
 			{
-				FD_SET(pConn->fd, &fdset);
+				continue;
+			}
+			if (pConn->state == STATE_REQUEST)
+			{
+				FD_SET(pConn->fd, &readfds);
+			}
+			else if (pConn->state == STATE_RESPONSE)
+			{
+				FD_SET(pConn->fd, &writefds);
+			}
+			FD_SET(pConn->fd, &exceptfds);
+			if (pConn->fd > maxfd)
+			{
+				maxfd = pConn->fd;
 			}
 		}
 
@@ -128,9 +146,7 @@ void TCP_Server::HandleConnections2()
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;
 
-		// The select function determines the status of one or more sockets, 
-		// waiting if necessary, to perform synchronous I/O.
-		int rv = select(0, &fdset, nullptr, nullptr, &timeout);
+		int rv = select(static_cast<int>(maxfd + 1), &readfds, &writefds, &exceptfds, &timeout);
 		if (rv == SOCKET_ERROR)
 		{
 			Die("select()");
@@ -141,16 +157,25 @@ void TCP_Server::HandleConnections2()
 			continue;
 		}
 
-		if (FD_ISSET(this->fd, &fdset))
+		if (FD_ISSET(this->fd, &readfds))
 		{
 			AcceptNewConnection(fd2conn, this->fd);
 		}
 
-		for (const auto& pConn : this->fd2conn)
+		for (auto it = this->fd2conn.begin(); it != this->fd2conn.end(); )
 		{
+			auto& pConn = *it;
 			if (pConn)
 			{
-				if (pConn && FD_ISSET(pConn->fd, &fdset))
+				if (FD_ISSET(pConn->fd, &exceptfds))
+				{
+					ConnectionIO(pConn);
+				}
+				else if (FD_ISSET(pConn->fd, &readfds))
+				{
+					ConnectionIO(pConn);
+				}
+				else if (FD_ISSET(pConn->fd, &writefds))
 				{
 					ConnectionIO(pConn);
 				}
@@ -159,11 +184,15 @@ void TCP_Server::HandleConnections2()
 				{
 					closesocket(pConn->fd);
 					delete pConn;
+					it = this->fd2conn.erase(it);
+					continue;
 				}
 			}
+			++it;
 		}
 	}
 }
+
 
 void TCP_Server::SetNonBlockingFD(SOCKET fd)
 {
@@ -350,7 +379,7 @@ void TCP_Server::ConnectionIO(Conn* conn)
 		StateRequest(conn);
 	}
 
-	if (conn->state == STATE_RESPONSE)
+	else if (conn->state == STATE_RESPONSE)
 	{
 		StateResponse(conn);
 	}
