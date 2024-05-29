@@ -523,3 +523,42 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 
 	return WriteAll(connfd, wbuff, 4 + len);
 }
+
+int32_t TCP_Server::ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out)
+{
+	if (len < 4) 
+	{
+		return -1;
+	}
+
+	uint32_t n = 0;
+	memcpy(&n, &data[0], 4);
+	if (n > kMaxArgs) 
+	{
+		return -1;
+	}
+
+	size_t pos = 4;
+	while (n--) 
+	{
+		if (pos + 4 > len) 
+		{
+			return -1;
+		}
+		uint32_t sz = 0;
+		memcpy(&sz, &data[pos], 4);
+		if (pos + 4 + sz > len) 
+		{
+			return -1;
+		}
+		out.push_back(std::string((char*)&data[pos + 4], sz));
+		pos += 4 + sz;
+	}
+
+	if (pos != len) 
+	{
+		return -1;  // trailing garbage
+	}
+
+	return 0;
+}

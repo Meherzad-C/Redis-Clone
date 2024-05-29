@@ -1,6 +1,2 @@
-﻿  TCP_Client.cpp
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(57,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(63,53): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(151,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(166,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+﻿  LINK : C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\x64\Debug\TCP_Client.exe not found or not built by the last incremental link; performing full link
   TCP_Client.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\x64\Debug\TCP_Client.exe

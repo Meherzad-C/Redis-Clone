@@ -13,6 +13,7 @@ private:
 	int port;
 	SOCKET fd;
     static const size_t kMaxSize{ 4096 };
+    static const size_t kMaxArgs{ 1024 };
 
     enum
     {
@@ -40,6 +41,8 @@ private:
     void SetupSocket();
     void BindSocket();
     void ListenForConnections();
+    static void Msg(const char* msg);
+    static void Die(const char* msg);
     void HandleConnections();           // not in use now.
     void HandleConnections2();
     void DoSomething(SOCKET connfd);
@@ -55,8 +58,7 @@ private:
     static int32_t OneRequest(SOCKET connfd);
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
-    static void Msg(const char* msg);
-    static void Die(const char* msg);
+    static int32_t ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out);
 
 public:
     TCP_Server(int port);
