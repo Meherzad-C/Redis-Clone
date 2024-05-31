@@ -75,6 +75,7 @@ private:
     static uint32_t DoGet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
     static uint32_t DoSet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
     static uint32_t DoDel(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
+    static int32_t DoRequest(const uint8_t* req, uint32_t reqlen, uint32_t* rescode, uint8_t* res, uint32_t* reslen);
 
 public:
     TCP_Server(int port);

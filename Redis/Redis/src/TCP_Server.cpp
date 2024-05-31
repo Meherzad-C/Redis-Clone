@@ -6,6 +6,7 @@
 //	& other junk
 // ==============================
 
+#define CMD_IS(word, cmd) (_stricmp((word).c_str(), (cmd)) == 0)
 std::map<std::string, std::string> TCP_Server::g_map;
 
 // ==============================
@@ -600,4 +601,38 @@ uint32_t TCP_Server::DoDel(const std::vector<std::string>& cmd, uint8_t* res, ui
 	(void)reslen;
 	g_map.erase(cmd[1]);
 	return RESPONSE_OK;
+}
+
+int32_t TCP_Server::DoRequest(const uint8_t* req, uint32_t reqlen, uint32_t* rescode, uint8_t* res, uint32_t* reslen)
+{
+	std::vector<std::string> cmd;
+	if (0 != ParseRequest(req, reqlen, cmd)) 
+	{
+		Msg("bad request");
+		return -1;
+	}
+
+	if (cmd.size() == 2 && CMD_IS(cmd[0], "get")) 
+	{
+		*rescode = DoGet(cmd, res, reslen);
+	}
+	else if (cmd.size() == 3 && CMD_IS(cmd[0], "set"))
+	{
+		*rescode = DoSet(cmd, res, reslen);
+	}
+	else if (cmd.size() == 2 && CMD_IS(cmd[0], "del"))
+	{
+		*rescode = DoDel(cmd, res, reslen);
+	}
+	else 
+	{
+		// cmd is not recognized
+		*rescode = RESPONSE_ERROR;
+		const char* msg = "Unknown cmd";
+		*reslen = strlen(msg);
+		strcpy_s((char*)res, *reslen, msg);
+		return 0;
+	}
+
+	return 0;
 }
