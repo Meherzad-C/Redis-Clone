@@ -274,16 +274,28 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 		return false;
 	}
 
-	// got one request, do something with it
-	printf("client says: %.*s\n", len, &conn->rbuff[4]);
+	// got one request, generate the response.
+	uint32_t rescode = 0;
+	uint32_t wlen = 0;
+	int32_t err = DoRequest(&conn->rbuff[4], len, &rescode, &conn->wbuff[4 + 4], &wlen);
 
-	// generating echoing response
+	if (err) 
+	{
+		conn->state = STATE_END;
+		return false;
+	}
+	
+	wlen += 4;
+
+	memcpy(&conn->wbuff[0], &wlen, 4);
 	memcpy(&conn->wbuff[0], &len, 4);
+	memcpy(&conn->wbuff[4], &rescode, 4);
 	memcpy(&conn->wbuff[4], &conn->rbuff[4], len);
-	conn->wbuff_size = 4 + len;
+	conn->wbuff_size = 4 + wlen;
 
 	size_t remain = conn->rbuff_size - 4 - len;
-	if (remain) {
+	if (remain) 
+	{
 		memmove(conn->rbuff, &conn->rbuff[4 + len], remain);
 	}
 	conn->rbuff_size = remain;
