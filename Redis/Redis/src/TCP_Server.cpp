@@ -585,3 +585,19 @@ uint32_t TCP_Server::DoGet(const std::vector<std::string>& cmd, uint8_t* res, ui
 
 	return RESPONSE_OK;
 }
+
+uint32_t TCP_Server::DoSet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+{
+	(void)res;
+	(void)reslen;
+	g_map[cmd[1]] = cmd[2];
+	return RESPONSE_OK;
+}
+
+uint32_t TCP_Server::DoDel(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+{
+	(void)res;
+	(void)reslen;
+	g_map.erase(cmd[1]);
+	return RESPONSE_OK;
+}

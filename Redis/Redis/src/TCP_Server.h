@@ -73,6 +73,8 @@ private:
     static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
     static int32_t ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out);
     static uint32_t DoGet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
+    static uint32_t DoSet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
+    static uint32_t DoDel(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
 
 public:
     TCP_Server(int port);
