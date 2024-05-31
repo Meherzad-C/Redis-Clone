@@ -1,6 +1,14 @@
 #include "TCP_Server.h"
 
 // ==============================
+//	Marcros, 
+//	static member variables
+//	& other junk
+// ==============================
+
+std::map<std::string, std::string> TCP_Server::g_map;
+
+// ==============================
 //	Constructors and Destructors
 // ==============================
 
@@ -251,7 +259,7 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 	uint32_t len = 0;
 
 	memcpy(&len, &conn->rbuff[0], 4);
-	if (len > kMaxSize)
+	if (len > kMaxMsg)
 	{
 		Msg("Message too long");
 		conn->state = STATE_END;
@@ -478,7 +486,7 @@ int32_t TCP_Server::WriteAll(SOCKET fd, const char* buff, size_t n)
 int32_t TCP_Server::OneRequest(SOCKET connfd)
 {
 	// 4 bytes for header, kMaxSize for actual message, 1 byte for null terminator
-	char rbuff[4 + kMaxSize + 1];
+	char rbuff[4 + kMaxMsg + 1];
 	//memcpy(rbuff, 0, sizeof(rbuff));
 	int getError = WSAGetLastError();
 	int32_t err = ReadFull(connfd, rbuff, 4);
@@ -498,7 +506,7 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 
 	uint32_t len = 0;
 	memcpy(&len, rbuff, 4);
-	if (len > kMaxSize)
+	if (len > kMaxMsg)
 	{
 		Msg("too long");
 		return -1;
@@ -561,4 +569,19 @@ int32_t TCP_Server::ParseRequest(const uint8_t* data, size_t len, std::vector<st
 	}
 
 	return 0;
+}
+
+uint32_t TCP_Server::DoGet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+{
+	if (!g_map.count(cmd[1])) 
+	{
+		return RESPONSE_NOT_FOUND;
+	}
+
+	std::string& val = g_map[cmd[1]];
+	assert(val.size() <= kMaxMsg);
+	memcpy(res, val.data(), val.size());
+	*reslen = (uint32_t)val.size();
+
+	return RESPONSE_OK;
 }
