@@ -4,13 +4,15 @@
 #include <WinSock2.h>
 #include <ws2tcpip.h>
 #include <cassert>
+#include <string>
+#include <vector>
 
 #pragma comment(lib, "Ws2_32.lib")
 
 class TCP_Client {
 private:
     SOCKET fd;
-    static const size_t kMaxSize{ 4096 };
+    static const size_t kMaxMsg{ 4096 };
 
 private:
     static void Die(const char* msg);
@@ -29,6 +31,6 @@ public:
     void Receive_Message(char* buffer, size_t bufferSize);
     static int32_t QueryServer(SOCKET fd, const char* text);
     // The QueryServer() is simply broken into SendRequest() and ReadRequest()
-    static int32_t SendRequest(SOCKET fd, const char* text);
+    static int32_t SendRequest(SOCKET fd, std::vector<std::string>& cmd);
     static int32_t ReadRequest(SOCKET fd);
 };

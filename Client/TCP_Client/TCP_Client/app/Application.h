@@ -11,11 +11,11 @@
 class Application
 {
 private:
-	void InitilizeClient();
+	void InitilizeClient(int argc, char** argv); // TODO: find a better way for passing arguements from main()
 
 public:
 	Application();
 	~Application();
 
-	void Run();
+	void Run(int argc, char** argv);
 };

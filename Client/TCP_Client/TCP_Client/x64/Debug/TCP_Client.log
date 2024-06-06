@@ -1,2 +1,4 @@
-﻿  LINK : C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\x64\Debug\TCP_Client.exe not found or not built by the last incremental link; performing full link
+﻿  Application.cpp
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\app\Application.cpp(4,1): warning C4005: 'PORT': macro redefinition
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\app\Application.h(5,1): message : see previous definition of 'PORT'
   TCP_Client.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\x64\Debug\TCP_Client.exe

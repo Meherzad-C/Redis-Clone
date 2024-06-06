@@ -21,16 +21,16 @@ Application::~Application()
 //	Run Function
 // ==============================
 
-void Application::Run()
+void Application::Run(int argc, char** argv)
 {
-	InitilizeClient();
+	InitilizeClient(argc, argv);
 }
 
 // ==============================
 //	Private Member Functions
 // ==============================
 
-void Application::InitilizeClient()
+void Application::InitilizeClient(int argc, char** argv)
 {
 	TCP_Client client;
 	
@@ -41,25 +41,23 @@ void Application::InitilizeClient()
 	}
 
 	SOCKET fd = client.GetSocket();
-	const char* queryList[3] = { "hello1", "hello2", "hello3" };
-
-	for (int i = 0; i < 3; ++i)
+	
+	std::vector<std::string> cmd;
+	for (int i = 1; i < argc; ++i) 
 	{
-		int err = client.SendRequest(fd, queryList[i]);
-		if (err != 0)
-		{
-			std::cerr << "Falied to SendRequest()" << std::endl;
-			return;
-		}
+		std::cout << argv[i] << std::endl;
+		cmd.push_back(argv[i]);
 	}
 
-	for (int i = 0; i < 3; ++i)
+	int32_t err = client.SendRequest(fd, cmd);
+	if (err != 0)
 	{
-		int err = client.ReadRequest(fd);
-		if (err != 0)
-		{
-			std::cerr << "Failed to ReadRequest()" << std::endl;
-			return;
-		}
+		std::cout << "SendRequest() error" << std::endl;
+	}
+
+	err = client.ReadRequest(fd);
+	if (err != 0)
+	{
+		std::cout << "ReadRequest() error" << std::endl;
 	}
 }
