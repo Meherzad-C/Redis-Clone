@@ -1,6 +1,15 @@
 #include "TCP_Server.h"
 
 // ==============================
+//	Marcros, 
+//	static member variables
+//	& other junk
+// ==============================
+
+#define CMD_IS(word, cmd) (_stricmp((word).c_str(), (cmd)) == 0)
+std::map<std::string, std::string> TCP_Server::g_map;
+
+// ==============================
 //	Constructors and Destructors
 // ==============================
 
@@ -251,7 +260,7 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 	uint32_t len = 0;
 
 	memcpy(&len, &conn->rbuff[0], 4);
-	if (len > kMaxSize)
+	if (len > kMaxMsg)
 	{
 		Msg("Message too long");
 		conn->state = STATE_END;
@@ -265,16 +274,24 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 		return false;
 	}
 
-	// got one request, do something with it
-	printf("client says: %.*s\n", len, &conn->rbuff[4]);
+	// got one request, generate the response.
+	uint32_t rescode = 0;
+	uint32_t wlen = 0;
+	int32_t err = DoRequest(&conn->rbuff[4], len, &rescode, &conn->wbuff[4 + 4], &wlen);
 
-	// generating echoing response
-	memcpy(&conn->wbuff[0], &len, 4);
-	memcpy(&conn->wbuff[4], &conn->rbuff[4], len);
-	conn->wbuff_size = 4 + len;
+	if (err) 
+	{
+		conn->state = STATE_END;
+		return false;
+	}
+	wlen += 4;
+	memcpy(&conn->wbuff[0], &wlen, 4);
+	memcpy(&conn->wbuff[4], &rescode, 4);
+	conn->wbuff_size = 4 + wlen;
 
 	size_t remain = conn->rbuff_size - 4 - len;
-	if (remain) {
+	if (remain) 
+	{
 		memmove(conn->rbuff, &conn->rbuff[4 + len], remain);
 	}
 	conn->rbuff_size = remain;
@@ -478,7 +495,7 @@ int32_t TCP_Server::WriteAll(SOCKET fd, const char* buff, size_t n)
 int32_t TCP_Server::OneRequest(SOCKET connfd)
 {
 	// 4 bytes for header, kMaxSize for actual message, 1 byte for null terminator
-	char rbuff[4 + kMaxSize + 1];
+	char rbuff[4 + kMaxMsg + 1];
 	//memcpy(rbuff, 0, sizeof(rbuff));
 	int getError = WSAGetLastError();
 	int32_t err = ReadFull(connfd, rbuff, 4);
@@ -498,7 +515,7 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 
 	uint32_t len = 0;
 	memcpy(&len, rbuff, 4);
-	if (len > kMaxSize)
+	if (len > kMaxMsg)
 	{
 		Msg("too long");
 		return -1;
@@ -522,4 +539,108 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 	memcpy(&wbuff[4], reply, len);
 
 	return WriteAll(connfd, wbuff, 4 + len);
+}
+
+int32_t TCP_Server::ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out)
+{
+	if (len < 4) 
+	{
+		return -1;
+	}
+
+	uint32_t n = 0;
+	memcpy(&n, &data[0], 4);
+	if (n > kMaxArgs) 
+	{
+		return -1;
+	}
+
+	size_t pos = 4;
+	while (n--) 
+	{
+		if (pos + 4 > len) 
+		{
+			return -1;
+		}
+		uint32_t sz = 0;
+		memcpy(&sz, &data[pos], 4);
+		if (pos + 4 + sz > len) 
+		{
+			return -1;
+		}
+		out.push_back(std::string((char*)&data[pos + 4], sz));
+		pos += 4 + sz;
+	}
+
+	if (pos != len) 
+	{
+		return -1;  // trailing garbage
+	}
+
+	return 0;
+}
+
+uint32_t TCP_Server::DoGet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+{
+	if (!g_map.count(cmd[1])) 
+	{
+		return RESPONSE_NOT_FOUND;
+	}
+
+	std::string& val = g_map[cmd[1]];
+	assert(val.size() <= kMaxMsg);
+	memcpy(res, val.data(), val.size());
+	*reslen = (uint32_t)val.size();
+
+	return RESPONSE_OK;
+}
+
+uint32_t TCP_Server::DoSet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+{
+	(void)res;
+	(void)reslen;
+	g_map[cmd[1]] = cmd[2];
+	return RESPONSE_OK;
+}
+
+uint32_t TCP_Server::DoDel(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+{
+	(void)res;
+	(void)reslen;
+	g_map.erase(cmd[1]);
+	return RESPONSE_OK;
+}
+
+int32_t TCP_Server::DoRequest(const uint8_t* req, uint32_t reqlen, uint32_t* rescode, uint8_t* res, uint32_t* reslen)
+{
+	std::vector<std::string> cmd;
+	if (0 != ParseRequest(req, reqlen, cmd)) 
+	{
+		Msg("bad request");
+		return -1;
+	}
+
+	if (cmd.size() == 2 && CMD_IS(cmd[0], "get")) 
+	{
+		*rescode = DoGet(cmd, res, reslen);
+	}
+	else if (cmd.size() == 3 && CMD_IS(cmd[0], "set"))
+	{
+		*rescode = DoSet(cmd, res, reslen);
+	}
+	else if (cmd.size() == 2 && CMD_IS(cmd[0], "del"))
+	{
+		*rescode = DoDel(cmd, res, reslen);
+	}
+	else 
+	{
+		// cmd is not recognized
+		*rescode = RESPONSE_ERROR;
+		const char* msg = "Unknown cmd";
+		*reslen = strlen(msg);
+		strcpy_s((char*)res, *reslen, msg);
+		return 0;
+	}
+
+	return 0;
 }

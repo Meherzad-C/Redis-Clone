@@ -73,12 +73,12 @@ void TCP_Client::Receive_Message(char* buffer, size_t bufferSize)
 int32_t TCP_Client::QueryServer(SOCKET fd, const char* text)
 {
 	uint32_t len = static_cast<uint32_t>(strlen(text));
-	if (len > kMaxSize)
+	if (len > kMaxMsg)
 	{
 		return -1;
 	}
 
-	char wbuff[4 + kMaxSize];
+	char wbuff[4 + kMaxMsg];
 	//memcpy(wbuff, 0, sizeof(wbuff));
 	memcpy(wbuff, &len, 4);
 	memcpy(&wbuff[4], text, len);
@@ -89,7 +89,7 @@ int32_t TCP_Client::QueryServer(SOCKET fd, const char* text)
 	}
 
 	// 4 header bytes to store message length and kMaxSize to store actual message 
-	char rbuff[4 + kMaxSize + 1];
+	char rbuff[4 + kMaxMsg + 1];
 
 	int getError = WSAGetLastError();
 
@@ -108,7 +108,7 @@ int32_t TCP_Client::QueryServer(SOCKET fd, const char* text)
 	}
 
 	memcpy(&len, rbuff, 4);
-	if (len > kMaxSize)
+	if (len > kMaxMsg)
 	{
 		Msg("Message too long!");
 	}
@@ -181,28 +181,37 @@ SOCKET TCP_Client::GetSocket() const
 	return this->fd;
 }
 
-int32_t TCP_Client::SendRequest(SOCKET fd, const char* text)
+int32_t TCP_Client::SendRequest(SOCKET fd, std::vector<std::string>& cmd)
 {
-	uint32_t len = static_cast<uint32_t>(strlen(text));
-	
-	// do not overflow
-	if (len > kMaxSize)
+	uint32_t len = 4;
+	for (const std::string& s : cmd) 
 	{
-		Msg("Error SendingRequest()");
+		len += 4 + s.size();
+	}
+	if (len > kMaxMsg) 
+	{
 		return -1;
 	}
 
-	char wbuff[4 + kMaxSize];
-	memcpy(wbuff, &len, 4);
-	memcpy(&wbuff[4], text, len);
-
-	return WriteAll(fd, wbuff, 4 + len);
+	char wbuf[4 + kMaxMsg];
+	memcpy(&wbuf[0], &len, 4);  // assume little endian
+	uint32_t n = cmd.size();
+	memcpy(&wbuf[4], &n, 4);
+	size_t cur = 8;
+	for (const std::string& s : cmd) 
+	{
+		uint32_t p = (uint32_t)s.size();
+		memcpy(&wbuf[cur], &p, 4);
+		memcpy(&wbuf[cur + 4], s.data(), s.size());
+		cur += 4 + s.size();
+	}
+	return WriteAll(fd, wbuf, 4 + len);
 }
 
 int32_t TCP_Client::ReadRequest(SOCKET fd)
 {
 	// 4=len, kMaxSize=sizeof Message, 1=string delimiter
-	char rbuff[4 + kMaxSize + 1];
+	char rbuff[4 + kMaxMsg + 1];
 	
 	int err = ReadFull(fd, rbuff, 4);
 
@@ -227,7 +236,7 @@ int32_t TCP_Client::ReadRequest(SOCKET fd)
 
 	memcpy(&len, rbuff, 4);
 
-	if (len > kMaxSize)
+	if (len > kMaxMsg)
 	{
 		Msg("Message too long");
 		return -1;
@@ -244,9 +253,14 @@ int32_t TCP_Client::ReadRequest(SOCKET fd)
 		return err;
 	}
 
-	// Do something
-	rbuff[4 + len] = '\0';
-	std::cout << "Server says: " << &rbuff[4] << std::endl;
+	// print the result
+	uint32_t rescode = 0;
+	if (len < 4) {
+		Msg("bad response");
+		return -1;
+	}
+	memcpy(&rescode, &rbuff[4], 4);
+	printf("server says: [%u] %.*s\n", rescode, len - 4, &rbuff[8]);
 
 	return 0;
 }
