@@ -45,7 +45,6 @@ void Application::InitilizeClient(int argc, char** argv)
 	std::vector<std::string> cmd;
 	for (int i = 1; i < argc; ++i) 
 	{
-		std::cout << argv[i] << std::endl;
 		cmd.push_back(argv[i]);
 	}
 

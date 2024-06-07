@@ -284,13 +284,9 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 		conn->state = STATE_END;
 		return false;
 	}
-	
 	wlen += 4;
-
 	memcpy(&conn->wbuff[0], &wlen, 4);
-	memcpy(&conn->wbuff[0], &len, 4);
 	memcpy(&conn->wbuff[4], &rescode, 4);
-	memcpy(&conn->wbuff[4], &conn->rbuff[4], len);
 	conn->wbuff_size = 4 + wlen;
 
 	size_t remain = conn->rbuff_size - 4 - len;
