@@ -56,8 +56,7 @@ private:
     void ListenForConnections();
     static void Msg(const char* msg);
     static void Die(const char* msg);
-    void HandleConnections();           // not in use now.
-    void HandleConnections2();
+    void HandleConnections();
     void DoSomething(SOCKET connfd);
     bool TryOneRequest(Conn* conn);
     void StateRequest(Conn* conn);

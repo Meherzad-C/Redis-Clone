@@ -38,7 +38,7 @@ TCP_Server::~TCP_Server()
 void TCP_Server::Start()
 {
 	//HandleConnections();
-	HandleConnections2();
+	HandleConnections();
 }
 
 // ==============================
@@ -89,33 +89,6 @@ void TCP_Server::ListenForConnections()
 }
 
 void TCP_Server::HandleConnections()
-{
-	while (true)
-	{
-		struct sockaddr_in client_addr = {};
-		int addrlen = sizeof(client_addr);
-
-		SOCKET connfd = accept(this->fd, (struct sockaddr*)&client_addr, &addrlen);
-
-		if (connfd == INVALID_SOCKET)
-		{
-			continue;
-		}
-		while (true)
-		{
-			int32_t err = OneRequest(connfd);
-			if (err)
-			{
-				break;
-			}
-		}
-		/*DoSomething(connfd);*/
-		closesocket(connfd);
-	}
-
-}
-
-void TCP_Server::HandleConnections2()
 {
 	SetNonBlockingFD(this->fd);
 
