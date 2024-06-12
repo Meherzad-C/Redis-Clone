@@ -7,6 +7,9 @@
 #include <vector>
 #include <map>
 
+// project includes
+#include "Data_Structures/Hashtable/HashMap.h"
+
 #pragma comment(lib, "Ws2_32.lib")
 
 class TCP_Server

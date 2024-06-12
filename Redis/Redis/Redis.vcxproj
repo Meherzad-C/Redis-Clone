@@ -143,12 +143,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Data_Structures\Hashtable\HashMap.h" />
+    <ClInclude Include="Src\Data_Structures\Hashtable\HashNode.h" />
+    <ClInclude Include="Src\Data_Structures\Hashtable\HashTable.h" />
     <ClInclude Include="Src\TCP_Server.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App\Application.cpp" />
     <ClCompile Include="App\Main.cpp" />
     <ClCompile Include="App\Application.h" />
+    <ClCompile Include="Src\Data_Structures\Hashtable\HashMap.cpp" />
+    <ClCompile Include="Src\Data_Structures\Hashtable\HashNode.cpp" />
+    <ClCompile Include="Src\Data_Structures\Hashtable\HashTable.cpp" />
     <ClCompile Include="Src\TCP_Server.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

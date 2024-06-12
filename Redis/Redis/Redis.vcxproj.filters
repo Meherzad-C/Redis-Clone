@@ -18,6 +18,15 @@
     <ClInclude Include="Src\TCP_Server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Data_Structures\Hashtable\HashNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data_Structures\Hashtable\HashTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data_Structures\Hashtable\HashMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\TCP_Server.cpp">
@@ -30,6 +39,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="App\Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data_Structures\Hashtable\HashNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data_Structures\Hashtable\HashTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data_Structures\Hashtable\HashMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
