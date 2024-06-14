@@ -7,7 +7,7 @@
         reinterpret_cast<char*>(ptr) - offsetof(type, member) \
     ))
 
-uint64_t StrHash(const uint8_t* data, size_t len)
+inline uint64_t StrHash(const uint8_t* data, size_t len)
 {
 	uint32_t h = 0x811C9DC5;
 	for (size_t i = 0; i < len; i++) 
