@@ -8,11 +8,6 @@
 
 #define CMD_IS(word, cmd) (_stricmp((word).c_str(), (cmd)) == 0)
 
-// Get the address of the containing structure from a pointer to one of its members
-#define container_of(ptr, type, member) \
-    (reinterpret_cast<type*>( \
-        reinterpret_cast<char*>(ptr) - offsetof(type, member) \
-    ))
 TCP_Server::gData TCP_Server::gdata_;
 
 // ==============================
@@ -476,15 +471,6 @@ bool TCP_Server::EntryEq(HNode* lhs, HNode* rhs)
 	Entry* le = container_of(lhs, Entry, node);
 	Entry* re = container_of(rhs, Entry, node);
 	return le->key == re->key;
-}
-
-uint64_t TCP_Server::StrHash(const uint8_t* data, size_t len)
-{
-	uint32_t h = 0x811C9DC5;
-	for (size_t i = 0; i < len; i++) {
-		h = (h + data[i]) * 0x01000193;
-	}
-	return h;
 }
 
 int32_t TCP_Server::OneRequest(SOCKET connfd)

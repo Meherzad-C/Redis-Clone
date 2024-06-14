@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Common\Utility.h" />
     <ClInclude Include="Src\Data_Structures\Hashtable\HashMap.h" />
     <ClInclude Include="Src\Data_Structures\Hashtable\HashNode.h" />
     <ClInclude Include="Src\Data_Structures\Hashtable\HashTable.h" />

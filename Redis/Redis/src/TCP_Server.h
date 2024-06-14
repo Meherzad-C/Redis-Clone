@@ -7,6 +7,7 @@
 #include <vector>
 
 // project includes
+#include "Common/Utility.h"
 #include "Data_Structures/Hashtable/HashMap.h"
 
 #pragma comment(lib, "Ws2_32.lib")
@@ -83,7 +84,6 @@ private:
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
     static bool EntryEq(HNode* lhs, HNode* rhs);
-    static uint64_t StrHash(const uint8_t* data, size_t len);
     static int32_t ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out);
     static uint32_t DoGet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
     static uint32_t DoSet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
