@@ -53,7 +53,7 @@ private:
     {
         HMap db;
     } gData;
-
+    static gData gdata_;
     // the structure for the key
     typedef struct Entry 
     {

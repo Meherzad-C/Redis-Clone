@@ -13,6 +13,7 @@
     (reinterpret_cast<type*>( \
         reinterpret_cast<char*>(ptr) - offsetof(type, member) \
     ))
+TCP_Server::gData TCP_Server::gdata_;
 
 // ==============================
 //	Constructors and Destructors
@@ -577,7 +578,7 @@ int32_t TCP_Server::ParseRequest(const uint8_t* data, size_t len, std::vector<st
 uint32_t TCP_Server::DoGet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
 {
 	Entry key;
-	gData gdata_;
+	// gData gdata_;
 	key.key.swap(cmd[1]);
 	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
 
@@ -600,7 +601,7 @@ uint32_t TCP_Server::DoSet(std::vector<std::string>& cmd, uint8_t* res, uint32_t
 	(void)reslen;
 
 	Entry key;
-	gData gdata_;
+	// gData gdata_;
 	key.key.swap(cmd[1]);
 	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
 
@@ -624,7 +625,7 @@ uint32_t TCP_Server::DoDel(std::vector<std::string>& cmd, uint8_t* res, uint32_t
 	(void)reslen;
 
 	Entry key;
-	gData gdata_;
+	// gData gdata_;
 	key.key.swap(cmd[1]);
 	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
 
@@ -662,7 +663,7 @@ int32_t TCP_Server::DoRequest(const uint8_t* req, uint32_t reqlen, uint32_t* res
 		*rescode = RESPONSE_ERROR;
 		const char* msg = "Unknown cmd";
 		*reslen = strlen(msg);
-		strcpy_s((char*)res, *reslen, msg);
+		strcpy_s((char*)res, *reslen + 1, msg);
 		return 0;
 	}
 
