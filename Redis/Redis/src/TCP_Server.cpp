@@ -7,7 +7,12 @@
 // ==============================
 
 #define CMD_IS(word, cmd) (_stricmp((word).c_str(), (cmd)) == 0)
-std::map<std::string, std::string> TCP_Server::g_map;
+
+// Get the address of the containing structure from a pointer to one of its members
+#define container_of(ptr, type, member) \
+    (reinterpret_cast<type*>( \
+        reinterpret_cast<char*>(ptr) - offsetof(type, member) \
+    ))
 
 // ==============================
 //	Constructors and Destructors
@@ -465,6 +470,22 @@ int32_t TCP_Server::WriteAll(SOCKET fd, const char* buff, size_t n)
 	return 0;
 }
 
+bool TCP_Server::EntryEq(HNode* lhs, HNode* rhs)
+{
+	Entry* le = container_of(lhs, Entry, node);
+	Entry* re = container_of(rhs, Entry, node);
+	return le->key == re->key;
+}
+
+uint64_t TCP_Server::StrHash(const uint8_t* data, size_t len)
+{
+	uint32_t h = 0x811C9DC5;
+	for (size_t i = 0; i < len; i++) {
+		h = (h + data[i]) * 0x01000193;
+	}
+	return h;
+}
+
 int32_t TCP_Server::OneRequest(SOCKET connfd)
 {
 	// 4 bytes for header, kMaxSize for actual message, 1 byte for null terminator
@@ -553,14 +574,19 @@ int32_t TCP_Server::ParseRequest(const uint8_t* data, size_t len, std::vector<st
 	return 0;
 }
 
-uint32_t TCP_Server::DoGet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+uint32_t TCP_Server::DoGet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
 {
-	if (!g_map.count(cmd[1])) 
-	{
+	Entry key;
+	gData gdata_;
+	key.key.swap(cmd[1]);
+	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+
+	HNode* node = gdata_.db.Lookup(&key.node, &EntryEq);
+	if (!node) {
 		return RESPONSE_NOT_FOUND;
 	}
 
-	std::string& val = g_map[cmd[1]];
+	const std::string& val = container_of(node, Entry, node)->val;
 	assert(val.size() <= kMaxMsg);
 	memcpy(res, val.data(), val.size());
 	*reslen = (uint32_t)val.size();
@@ -568,19 +594,44 @@ uint32_t TCP_Server::DoGet(const std::vector<std::string>& cmd, uint8_t* res, ui
 	return RESPONSE_OK;
 }
 
-uint32_t TCP_Server::DoSet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+uint32_t TCP_Server::DoSet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
 {
 	(void)res;
 	(void)reslen;
-	g_map[cmd[1]] = cmd[2];
+
+	Entry key;
+	gData gdata_;
+	key.key.swap(cmd[1]);
+	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+
+	HNode* node = gdata_.db.Lookup(&key.node, &EntryEq);
+	if (node) {
+		container_of(node, Entry, node)->val.swap(cmd[2]);
+	}
+	else {
+		Entry* ent = new Entry();
+		ent->key.swap(key.key);
+		ent->node.hcode = key.node.hcode;
+		ent->val.swap(cmd[2]);
+		gdata_.db.Insert(& ent->node);
+	}
 	return RESPONSE_OK;
 }
 
-uint32_t TCP_Server::DoDel(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+uint32_t TCP_Server::DoDel(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
 {
 	(void)res;
 	(void)reslen;
-	g_map.erase(cmd[1]);
+
+	Entry key;
+	gData gdata_;
+	key.key.swap(cmd[1]);
+	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+
+	HNode* node = gdata_.db.Pop(&key.node, &EntryEq);
+	if (node) {
+		delete container_of(node, Entry, node);
+	}
 	return RESPONSE_OK;
 }
 

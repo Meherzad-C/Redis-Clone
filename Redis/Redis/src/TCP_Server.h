@@ -5,7 +5,6 @@
 #include <cassert>
 #include <string>
 #include <vector>
-#include <map>
 
 // project includes
 #include "Data_Structures/Hashtable/HashMap.h"
@@ -49,9 +48,19 @@ private:
 
     std::vector<Conn*> fd2conn;
 
-    // The data structure for the key space. 
-    // This is just a placeholder until we implement a hashtable.
-    static std::map<std::string, std::string> g_map;
+    // The data structure for the key space.
+    typedef struct gData
+    {
+        HMap db;
+    } gData;
+
+    // the structure for the key
+    typedef struct Entry 
+    {
+        HNode node;
+        std::string key;
+        std::string val;
+    }Entry;
 
 private:
     void SetupSocket();
@@ -73,10 +82,12 @@ private:
     static int32_t OneRequest(SOCKET connfd);
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
+    static bool EntryEq(HNode* lhs, HNode* rhs);
+    static uint64_t StrHash(const uint8_t* data, size_t len);
     static int32_t ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out);
-    static uint32_t DoGet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
-    static uint32_t DoSet(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
-    static uint32_t DoDel(const std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
+    static uint32_t DoGet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
+    static uint32_t DoSet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
+    static uint32_t DoDel(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
     static int32_t DoRequest(const uint8_t* req, uint32_t reqlen, uint32_t* rescode, uint8_t* res, uint32_t* reslen);
 
 public:

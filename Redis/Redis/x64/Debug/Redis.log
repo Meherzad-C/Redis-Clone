@@ -5,12 +5,12 @@
   HashNode.cpp
   HashTable.cpp
   TCP_Server.cpp
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(144,37): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(290,68): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(334,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(434,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(454,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(613,24): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(149,37): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(295,68): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(339,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(439,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(459,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(664,24): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
   Generating Code...
 x64\Debug\Application.obj : warning LNK4042: object specified more than once; extras ignored
   Redis.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\x64\Debug\Redis.exe
