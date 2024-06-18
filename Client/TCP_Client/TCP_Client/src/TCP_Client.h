@@ -7,6 +7,10 @@
 #include <string>
 #include <vector>
 
+// project includes
+#include "Common/Utility.h"
+#include "DataHandlers/DataSerialization.h"
+
 #pragma comment(lib, "Ws2_32.lib")
 
 class TCP_Client {
@@ -14,9 +18,10 @@ private:
     SOCKET fd;
     static const size_t kMaxMsg{ 4096 };
 
+    static DataSerializer dataSerializer;
+
 private:
     static void Die(const char* msg);
-    static void Msg(const char* msg);
 
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
@@ -32,5 +37,5 @@ public:
     static int32_t QueryServer(SOCKET fd, const char* text);
     // The QueryServer() is simply broken into SendRequest() and ReadRequest()
     static int32_t SendRequest(SOCKET fd, std::vector<std::string>& cmd);
-    static int32_t ReadRequest(SOCKET fd);
+    static int32_t ReadResponse(SOCKET fd);
 };

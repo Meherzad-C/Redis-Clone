@@ -248,19 +248,28 @@ bool TCP_Server::TryOneRequest(Conn* conn)
 		return false;
 	}
 
-	// got one request, generate the response.
-	uint32_t rescode = 0;
-	uint32_t wlen = 0;
-	int32_t err = DoRequest(&conn->rbuff[4], len, &rescode, &conn->wbuff[4 + 4], &wlen);
-
-	if (err) 
+	// parse the request
+	std::vector<std::string> cmd;
+	if (0 != ParseRequest(&conn->rbuff[4], len, cmd)) 
 	{
+		Msg("bad req");
 		conn->state = STATE_END;
 		return false;
 	}
-	wlen += 4;
+
+	// got one request, generate the response.
+	std::string out;
+	DoRequest(cmd, out);
+
+	// pack the response into the buffer
+	if (4 + out.size() > kMaxMsg) {
+		out.clear();
+		OutError(out, ERROR_TOO_BIG, "response is too big");
+	}
+	uint32_t wlen = (uint32_t)out.size();
+
 	memcpy(&conn->wbuff[0], &wlen, 4);
-	memcpy(&conn->wbuff[4], &rescode, 4);
+	memcpy(&conn->wbuff[4], out.data(), out.size());
 	conn->wbuff_size = 4 + wlen;
 
 	size_t remain = conn->rbuff_size - 4 - len;
@@ -522,6 +531,54 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 	return WriteAll(connfd, wbuff, 4 + len);
 }
 
+void TCP_Server::OutNil(std::string& out) 
+{
+	out.push_back(SERIALIZATION_NIL);
+}
+
+void TCP_Server::CbScan(HNode* node, void* arg)
+{
+	std::string& out = *(std::string*)arg;
+	OutString(out, container_of(node, Entry, node)->key);
+}
+
+void TCP_Server::OutString(std::string& out, const std::string& val) 
+{
+	out.push_back(SERIALIZATION_STRING);
+	uint32_t len = (uint32_t)val.size();
+	out.append((char*)&len, 4);
+	out.append(val);
+}
+
+void TCP_Server::DoKeys(std::vector<std::string>& cmd, std::string& out)
+{
+	(void)cmd;
+	OutArray(out, (uint32_t)gdata_.db.HM_Size());
+	gdata_.db.HM_Scan(HMap::HTableType::PRIMARY_HT1, &CbScan, &out);
+	gdata_.db.HM_Scan(HMap::HTableType::SECONDARY_HT2, &CbScan, &out);
+}
+
+void TCP_Server::OutInt(std::string& out, int64_t val) 
+{
+	out.push_back(SERIALIZATION_INT);
+	out.append((char*)&val, 8);
+}
+
+void TCP_Server::OutError(std::string& out, int32_t code, const std::string& msg) 
+{
+	out.push_back(SERIALIZATION_ERROR);
+	out.append((char*)&code, 4);
+	uint32_t len = (uint32_t)msg.size();
+	out.append((char*)&len, 4);
+	out.append(msg);
+}
+
+void TCP_Server::OutArray(std::string& out, uint32_t n) 
+{
+	out.push_back(SERIALIZATION_ARRAY);
+	out.append((char*)&n, 4);
+}
+
 int32_t TCP_Server::ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out)
 {
 	if (len < 4) 
@@ -561,38 +618,33 @@ int32_t TCP_Server::ParseRequest(const uint8_t* data, size_t len, std::vector<st
 	return 0;
 }
 
-uint32_t TCP_Server::DoGet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+void TCP_Server::DoGet(std::vector<std::string>& cmd, std::string& out)
 {
 	Entry key;
 	// gData gdata_;
 	key.key.swap(cmd[1]);
 	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
 
-	HNode* node = gdata_.db.Lookup(&key.node, &EntryEq);
-	if (!node) {
-		return RESPONSE_NOT_FOUND;
+	HNode* node = gdata_.db.HM_Lookup(&key.node, &EntryEq);
+	if (!node) 
+	{
+		return OutNil(out);
 	}
 
 	const std::string& val = container_of(node, Entry, node)->val;
-	assert(val.size() <= kMaxMsg);
-	memcpy(res, val.data(), val.size());
-	*reslen = (uint32_t)val.size();
-
-	return RESPONSE_OK;
+	OutString(out, val);
 }
 
-uint32_t TCP_Server::DoSet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+void TCP_Server::DoSet(std::vector<std::string>& cmd, std::string& out)
 {
-	(void)res;
-	(void)reslen;
-
 	Entry key;
 	// gData gdata_;
 	key.key.swap(cmd[1]);
 	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
 
-	HNode* node = gdata_.db.Lookup(&key.node, &EntryEq);
-	if (node) {
+	HNode* node = gdata_.db.HM_Lookup(&key.node, &EntryEq);
+	if (node) 
+	{
 		container_of(node, Entry, node)->val.swap(cmd[2]);
 	}
 	else {
@@ -600,58 +652,43 @@ uint32_t TCP_Server::DoSet(std::vector<std::string>& cmd, uint8_t* res, uint32_t
 		ent->key.swap(key.key);
 		ent->node.hcode = key.node.hcode;
 		ent->val.swap(cmd[2]);
-		gdata_.db.Insert(& ent->node);
+		gdata_.db.HM_Insert(& ent->node);
 	}
-	return RESPONSE_OK;
+	return OutNil(out);
 }
 
-uint32_t TCP_Server::DoDel(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen)
+void TCP_Server::DoDel(std::vector<std::string>& cmd, std::string& out)
 {
-	(void)res;
-	(void)reslen;
-
 	Entry key;
 	// gData gdata_;
 	key.key.swap(cmd[1]);
 	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
 
-	HNode* node = gdata_.db.Pop(&key.node, &EntryEq);
-	if (node) {
+	HNode* node = gdata_.db.HM_Pop(&key.node, &EntryEq);
+	if (node) 
+	{
 		delete container_of(node, Entry, node);
 	}
-	return RESPONSE_OK;
+
+	return OutInt(out, node ? 1 : 0);
 }
 
-int32_t TCP_Server::DoRequest(const uint8_t* req, uint32_t reqlen, uint32_t* rescode, uint8_t* res, uint32_t* reslen)
+void TCP_Server::DoRequest(std::vector<std::string>& cmd, std::string& out)
 {
-	std::vector<std::string> cmd;
-	if (0 != ParseRequest(req, reqlen, cmd)) 
-	{
-		Msg("bad request");
-		return -1;
+	if (cmd.size() == 1 && CMD_IS(cmd[0], "keys")) {
+		DoKeys(cmd, out);
 	}
-
-	if (cmd.size() == 2 && CMD_IS(cmd[0], "get")) 
-	{
-		*rescode = DoGet(cmd, res, reslen);
+	else if (cmd.size() == 2 && CMD_IS(cmd[0], "get")) {
+		DoGet(cmd, out);
 	}
-	else if (cmd.size() == 3 && CMD_IS(cmd[0], "set"))
-	{
-		*rescode = DoSet(cmd, res, reslen);
+	else if (cmd.size() == 3 && CMD_IS(cmd[0], "set")) {
+		DoSet(cmd, out);
 	}
-	else if (cmd.size() == 2 && CMD_IS(cmd[0], "del"))
-	{
-		*rescode = DoDel(cmd, res, reslen);
+	else if (cmd.size() == 2 && CMD_IS(cmd[0], "del")) {
+		DoDel(cmd, out);
 	}
-	else 
-	{
+	else {
 		// cmd is not recognized
-		*rescode = RESPONSE_ERROR;
-		const char* msg = "Unknown cmd";
-		*reslen = strlen(msg);
-		strcpy_s((char*)res, *reslen + 1, msg);
-		return 0;
+		OutError(out, ERROR_UNKNOWN, "Unknown cmd");
 	}
-
-	return 0;
 }

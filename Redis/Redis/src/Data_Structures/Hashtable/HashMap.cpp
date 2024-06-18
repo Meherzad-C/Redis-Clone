@@ -14,56 +14,69 @@ HMap::HMap() : resizing_pos(0)
 //	Public Member Functions
 // ==============================
 
-HNode* HMap::Lookup(HNode* key, bool (*eq)(HNode*, HNode*)) 
+HNode* HMap::HM_Lookup(HNode* key, bool (*eq)(HNode*, HNode*)) 
 {
-    HelpResizing();
-    HNode** from = ht1.Lookup(key, eq);
+    HM_HelpResizing();
+    HNode** from = ht1.HT_Lookup(key, eq);
 
     if (!from) 
     {
-        from = ht2.Lookup(key, eq);
+        from = ht2.HT_Lookup(key, eq);
     }
     return from ? *from : nullptr;
 }
 
-void HMap::Insert(HNode* node) 
+void HMap::HM_Insert(HNode* node) 
 {
     if (!ht1.table) 
     {
-        ht1.Init(4);
+        ht1.HT_Init(4);
     }
-    ht1.Insert(node);
+    ht1.HT_Insert(node);
 
     if (!ht2.table) 
     {
         size_t load_factor = ht1.size / (ht1.mask + 1);
         if (load_factor >= k_max_load_factor)
         {
-            StartResizing();
+            HM_StartResizing();
         }
     }
-    HelpResizing();
+    HM_HelpResizing();
 }
 
-HNode* HMap::Pop(HNode* key, bool (*eq)(HNode*, HNode*)) 
+HNode* HMap::HM_Pop(HNode* key, bool (*eq)(HNode*, HNode*))
 {
-    HelpResizing();
-    HNode** from = ht1.Lookup(key, eq);
+    HM_HelpResizing();
+    HNode** from = ht1.HT_Lookup(key, eq);
     if (from) 
     {
-        return ht1.Detach(from);
+        return ht1.HT_Detach(from);
     }
-    from = ht2.Lookup(key, eq);
+    from = ht2.HT_Lookup(key, eq);
     if (from) 
     {
-        return ht2.Detach(from);
+        return ht2.HT_Detach(from);
     }
     return nullptr;
 }
 
-size_t HMap::Size() const 
+size_t HMap::HM_Size() const
 {
     return ht1.size + ht2.size;
+}
+
+void HMap::HM_Scan(HTableType ht, void(*f)(HNode*, void*), void* arg)
+{
+    if (ht == HTableType::PRIMARY_HT1)
+    {
+        ht1.HT_Scan(f, arg);
+    }
+
+    if (ht == HTableType::SECONDARY_HT2)
+    {
+        ht2.HT_Scan(f, arg);
+    }
 }
 
 void HMap::Destroy() 
@@ -72,7 +85,7 @@ void HMap::Destroy()
     ht2.~HTable();
 }
 
-void HMap::HelpResizing() 
+void HMap::HM_HelpResizing()
 {
     size_t nwork = 0;
     while (nwork < k_resizing_work && ht2.size > 0) 
@@ -84,7 +97,7 @@ void HMap::HelpResizing()
             continue;
         }
 
-        ht1.Insert(ht2.Detach(from));
+        ht1.HT_Insert(ht2.HT_Detach(from));
         nwork++;
     }
 
@@ -95,10 +108,10 @@ void HMap::HelpResizing()
     }
 }
 
-void HMap::StartResizing() 
+void HMap::HM_StartResizing()
 {
     assert(ht2.table == nullptr);
     ht2 = ht1;
-    ht1.Init((ht1.mask + 1) * 2);
+    ht1.HT_Init((ht1.mask + 1) * 2);
     resizing_pos = 0;
 }

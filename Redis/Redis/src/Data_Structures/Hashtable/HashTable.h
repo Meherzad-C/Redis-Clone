@@ -14,9 +14,10 @@ public:
 
 public:
     HTable();
-    void Init(size_t n);
-    void Insert(HNode* node);
-    HNode** Lookup(HNode* key, bool (*eq)(HNode*, HNode*));
-    HNode* Detach(HNode** from);
+    void HT_Init(size_t n);
+    void HT_Insert(HNode* node);
+    HNode** HT_Lookup(HNode* key, bool (*eq)(HNode*, HNode*));
+    HNode* HT_Detach(HNode** from);
+    void HT_Scan(void (*f)(HNode*, void*), void* arg);
     ~HTable();
 };

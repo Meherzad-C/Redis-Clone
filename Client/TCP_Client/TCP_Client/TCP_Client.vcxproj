@@ -128,11 +128,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="app\Application.h" />
+    <ClInclude Include="src\Common\Utility.h" />
+    <ClInclude Include="src\DataHandlers\DataSerialization.h" />
     <ClInclude Include="src\TCP_Client.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\Application.cpp" />
     <ClCompile Include="app\Main.cpp" />
+    <ClCompile Include="src\DataHandlers\DataSerialization.cpp" />
     <ClCompile Include="src\TCP_Client.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

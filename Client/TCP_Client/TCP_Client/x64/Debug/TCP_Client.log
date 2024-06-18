@@ -1,4 +1,18 @@
 ﻿  Application.cpp
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\app\Application.cpp(4,1): warning C4005: 'PORT': macro redefinition
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\app\Application.h(5,1): message : see previous definition of 'PORT'
+  Main.cpp
+  DataSerialization.cpp
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\DataHandlers\DataSerialization.cpp(81,12): warning C4477: 'printf' : format string '%ld' requires an argument of type 'long', but variadic argument 1 has type 'int64_t'
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\DataHandlers\DataSerialization.cpp(81,12): message : consider using '%lld' in the format string
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\DataHandlers\DataSerialization.cpp(81,12): message : consider using '%Id' in the format string
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\DataHandlers\DataSerialization.cpp(81,12): message : consider using '%I64d' in the format string
+  TCP_Client.cpp
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(57,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(63,53): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(146,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(161,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(184,12): warning C4267: '+=': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\TCP_Client\src\TCP_Client.cpp(193,25): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+  Generating Code...
   TCP_Client.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Client\TCP_Client\x64\Debug\TCP_Client.exe

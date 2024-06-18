@@ -132,11 +132,6 @@ int32_t TCP_Client::QueryServer(SOCKET fd, const char* text)
 //	Private Member Functions
 // ==============================
 
-void TCP_Client::Msg(const char* msg)
-{
-	fprintf(stderr, "%s\n", msg);
-}
-
 void TCP_Client::Die(const char* msg)
 {
 	int errorMsg = WSAGetLastError();
@@ -208,7 +203,7 @@ int32_t TCP_Client::SendRequest(SOCKET fd, std::vector<std::string>& cmd)
 	return WriteAll(fd, wbuf, 4 + len);
 }
 
-int32_t TCP_Client::ReadRequest(SOCKET fd)
+int32_t TCP_Client::ReadResponse(SOCKET fd)
 {
 	// 4=len, kMaxSize=sizeof Message, 1=string delimiter
 	char rbuff[4 + kMaxMsg + 1];
@@ -254,13 +249,12 @@ int32_t TCP_Client::ReadRequest(SOCKET fd)
 	}
 
 	// print the result
-	uint32_t rescode = 0;
-	if (len < 4) {
+	int32_t rv = dataSerializer.OnResponse((uint8_t*)&rbuff[4], len);
+	if (rv > 0 && (uint32_t)rv != len) 
+	{
 		Msg("bad response");
-		return -1;
+		rv = -1;
 	}
-	memcpy(&rescode, &rbuff[4], 4);
-	printf("server says: [%u] %.*s\n", rescode, len - 4, &rbuff[8]);
 
-	return 0;
+	return rv;
 }

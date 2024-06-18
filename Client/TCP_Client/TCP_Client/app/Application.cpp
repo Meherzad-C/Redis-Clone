@@ -54,9 +54,9 @@ void Application::InitilizeClient(int argc, char** argv)
 		std::cout << "SendRequest() error" << std::endl;
 	}
 
-	err = client.ReadRequest(fd);
+	err = client.ReadResponse(fd);
 	if (err != 0)
 	{
-		std::cout << "ReadRequest() error" << std::endl;
+		client.~TCP_Client();
 	}
 }

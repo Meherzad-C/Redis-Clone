@@ -13,15 +13,22 @@ private:
     HTable ht1; // newer
     HTable ht2; // older
     size_t resizing_pos;
+    
+public:
+    enum class HTableType
+    {
+        PRIMARY_HT1,
+        SECONDARY_HT2
+    };
 
 public:
     HMap();
-    HNode* Lookup(HNode* key, bool (*eq)(HNode*, HNode*));
-    void Insert(HNode* node);
-    HNode* Pop(HNode* key, bool (*eq)(HNode*, HNode*));
-    size_t Size() const;
+    HNode* HM_Lookup(HNode* key, bool (*eq)(HNode*, HNode*));
+    void HM_Insert(HNode* node);
+    HNode* HM_Pop(HNode* key, bool (*eq)(HNode*, HNode*));
+    size_t HM_Size() const;
+    void HM_Scan(HTableType ht, void (*f)(HNode*, void*), void* arg);
+    void HM_HelpResizing();
+    void HM_StartResizing();
     void Destroy();
-
-    void HelpResizing();
-    void StartResizing();
 };

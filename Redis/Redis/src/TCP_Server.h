@@ -27,11 +27,27 @@ private:
         STATE_END = 2
     };
 
-    enum
+    // del this enum code
+    /*enum
     {
         RESPONSE_OK = 0,
         RESPONSE_ERROR = 1,
         RESPONSE_NOT_FOUND = 2
+    };*/
+
+    enum 
+    {
+        ERROR_UNKNOWN = 1,
+        ERROR_TOO_BIG = 2,
+    };
+
+    enum 
+    {
+        SERIALIZATION_NIL = 0,
+        SERIALIZATION_ERROR = 1,
+        SERIALIZATION_STRING = 2,
+        SERIALIZATION_INT = 3,
+        SERIALIZATION_ARRAY = 4,
     };
 
     typedef struct Conn
@@ -84,11 +100,18 @@ private:
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
     static bool EntryEq(HNode* lhs, HNode* rhs);
+    static void OutNil(std::string& out);
+    static void CbScan(HNode* node, void* arg);
+    static void OutString(std::string& out, const std::string& val);
+    static void DoKeys(std::vector<std::string>& cmd, std::string& out);
+    static void OutInt(std::string& out, int64_t val);
+    static void OutError(std::string& out, int32_t code, const std::string& msg);
+    static void OutArray(std::string& out, uint32_t n);
     static int32_t ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out);
-    static uint32_t DoGet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
-    static uint32_t DoSet(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
-    static uint32_t DoDel(std::vector<std::string>& cmd, uint8_t* res, uint32_t* reslen);
-    static int32_t DoRequest(const uint8_t* req, uint32_t reqlen, uint32_t* rescode, uint8_t* res, uint32_t* reslen);
+    static void DoGet(std::vector<std::string>& cmd, std::string& out);
+    static void DoSet(std::vector<std::string>& cmd, std::string& out);
+    static void DoDel(std::vector<std::string>& cmd, std::string& out);
+    static void DoRequest(std::vector<std::string>& cmd, std::string& out);
 
 public:
     TCP_Server(int port);
