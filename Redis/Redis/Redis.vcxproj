@@ -161,6 +161,7 @@
     <ClCompile Include="Src\Data_Structures\Hashtable\HashNode.cpp" />
     <ClCompile Include="Src\Data_Structures\Hashtable\HashTable.cpp" />
     <ClCompile Include="Src\TCP_Server.cpp" />
+    <ClCompile Include="TestCases\Test_AVLTree.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

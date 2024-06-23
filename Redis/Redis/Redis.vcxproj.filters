@@ -65,5 +65,8 @@
     <ClCompile Include="Src\Data_Structures\AVLTree\AVLTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TestCases\Test_AVLTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
