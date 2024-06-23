@@ -144,6 +144,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Src\Common\Utility.h" />
+    <ClInclude Include="Src\Data_Structures\AVLTree\AVLNode.h" />
+    <ClInclude Include="Src\Data_Structures\AVLTree\AVLTree.h" />
     <ClInclude Include="Src\Data_Structures\Hashtable\HashMap.h" />
     <ClInclude Include="Src\Data_Structures\Hashtable\HashNode.h" />
     <ClInclude Include="Src\Data_Structures\Hashtable\HashTable.h" />
@@ -153,6 +155,8 @@
     <ClCompile Include="App\Application.cpp" />
     <ClCompile Include="App\Main.cpp" />
     <ClCompile Include="App\Application.h" />
+    <ClCompile Include="Src\Data_Structures\AVLTree\AVLNode.cpp" />
+    <ClCompile Include="Src\Data_Structures\AVLTree\AVLTree.cpp" />
     <ClCompile Include="Src\Data_Structures\Hashtable\HashMap.cpp" />
     <ClCompile Include="Src\Data_Structures\Hashtable\HashNode.cpp" />
     <ClCompile Include="Src\Data_Structures\Hashtable\HashTable.cpp" />
