@@ -477,8 +477,8 @@ int32_t TCP_Server::WriteAll(SOCKET fd, const char* buff, size_t n)
 
 bool TCP_Server::EntryEq(HNode* lhs, HNode* rhs)
 {
-	Entry* le = container_of(lhs, Entry, node);
-	Entry* re = container_of(rhs, Entry, node);
+	Entry* le = CONTAINER_OF(lhs, Entry, node);
+	Entry* re = CONTAINER_OF(rhs, Entry, node);
 	return le->key == re->key;
 }
 
@@ -539,15 +539,20 @@ void TCP_Server::OutNil(std::string& out)
 void TCP_Server::CbScan(HNode* node, void* arg)
 {
 	std::string& out = *(std::string*)arg;
-	OutString(out, container_of(node, Entry, node)->key);
+	OutString(out, CONTAINER_OF(node, Entry, node)->key);
 }
 
-void TCP_Server::OutString(std::string& out, const std::string& val) 
+void TCP_Server::OutString(std::string& out, const char* s, size_t size)
 {
 	out.push_back(SERIALIZATION_STRING);
-	uint32_t len = (uint32_t)val.size();
+	uint32_t len = (uint32_t)size;
 	out.append((char*)&len, 4);
-	out.append(val);
+	out.append(s, len);
+}
+
+void TCP_Server::OutString(std::string& out, const std::string& val)
+{
+	return OutString(out, val.data(), val.size());
 }
 
 void TCP_Server::DoKeys(std::vector<std::string>& cmd, std::string& out)
@@ -564,6 +569,12 @@ void TCP_Server::OutInt(std::string& out, int64_t val)
 	out.append((char*)&val, 8);
 }
 
+void TCP_Server::OutDouble(std::string& out, double val)
+{
+	out.push_back(SERIALIZATION_DOUBLE);
+	out.append((char*)&val, 8);
+}
+
 void TCP_Server::OutError(std::string& out, int32_t code, const std::string& msg) 
 {
 	out.push_back(SERIALIZATION_ERROR);
@@ -577,6 +588,20 @@ void TCP_Server::OutArray(std::string& out, uint32_t n)
 {
 	out.push_back(SERIALIZATION_ARRAY);
 	out.append((char*)&n, 4);
+}
+
+void* TCP_Server::BeginArray(std::string& out) 
+{
+	out.push_back(SERIALIZATION_ARRAY);
+	out.append("\0\0\0\0", 4);          // filled in end_arr()
+	return (void*)(out.size() - 4);    // the `ctx` arg
+}
+
+void TCP_Server::EndArray(std::string& out, void* ctx, uint32_t n) 
+{
+	size_t pos = (size_t)ctx;
+	assert(out[pos - 1] == SERIALIZATION_ARRAY);
+	memcpy(&out[pos], &n, 4);
 }
 
 int32_t TCP_Server::ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out)
@@ -631,8 +656,12 @@ void TCP_Server::DoGet(std::vector<std::string>& cmd, std::string& out)
 		return OutNil(out);
 	}
 
-	const std::string& val = container_of(node, Entry, node)->val;
-	OutString(out, val);
+	Entry* ent = CONTAINER_OF(node, Entry, node);
+	if (ent->type != T_STRING) 
+	{
+		return OutError(out, ERROR_TYPE, "expect string type");
+	}
+	return OutString(out, ent->val);
 }
 
 void TCP_Server::DoSet(std::vector<std::string>& cmd, std::string& out)
@@ -645,7 +674,12 @@ void TCP_Server::DoSet(std::vector<std::string>& cmd, std::string& out)
 	HNode* node = gdata_.db.HM_Lookup(&key.node, &EntryEq);
 	if (node) 
 	{
-		container_of(node, Entry, node)->val.swap(cmd[2]);
+		Entry* ent = CONTAINER_OF(node, Entry, node);
+		if (ent->type != T_STRING) 
+		{
+			return OutError(out, ERROR_TYPE, "expect string type");
+		}
+		ent->val.swap(cmd[2]);
 	}
 	else {
 		Entry* ent = new Entry();
@@ -667,7 +701,7 @@ void TCP_Server::DoDel(std::vector<std::string>& cmd, std::string& out)
 	HNode* node = gdata_.db.HM_Pop(&key.node, &EntryEq);
 	if (node) 
 	{
-		delete container_of(node, Entry, node);
+		EntryDelete(CONTAINER_OF(node, Entry, node));
 	}
 
 	return OutInt(out, node ? 1 : 0);
@@ -675,20 +709,200 @@ void TCP_Server::DoDel(std::vector<std::string>& cmd, std::string& out)
 
 void TCP_Server::DoRequest(std::vector<std::string>& cmd, std::string& out)
 {
-	if (cmd.size() == 1 && CMD_IS(cmd[0], "keys")) {
+	if (cmd.size() == 1 && CMD_IS(cmd[0], "keys")) 
+	{
 		DoKeys(cmd, out);
 	}
-	else if (cmd.size() == 2 && CMD_IS(cmd[0], "get")) {
+	else if (cmd.size() == 2 && CMD_IS(cmd[0], "get")) 
+	{
 		DoGet(cmd, out);
 	}
-	else if (cmd.size() == 3 && CMD_IS(cmd[0], "set")) {
+	else if (cmd.size() == 3 && CMD_IS(cmd[0], "set")) 
+	{
 		DoSet(cmd, out);
 	}
-	else if (cmd.size() == 2 && CMD_IS(cmd[0], "del")) {
+	else if (cmd.size() == 2 && CMD_IS(cmd[0], "del")) 
+	{
 		DoDel(cmd, out);
 	}
-	else {
+	else if (cmd.size() == 4 && CMD_IS(cmd[0], "zadd"))
+	{
+		DoZadd(cmd, out);
+	}
+	else if (cmd.size() == 3 && CMD_IS(cmd[0], "zrem"))
+	{
+		DoZrem(cmd, out);
+	}
+	else if (cmd.size() == 3 && CMD_IS(cmd[0], "zscore"))
+	{
+		DoZscore(cmd, out);
+	}
+	else if (cmd.size() == 6 && CMD_IS(cmd[0], "zquery"))
+	{
+		DoZquery(cmd, out);
+	}
+	else 
+	{
 		// cmd is not recognized
 		OutError(out, ERROR_UNKNOWN, "Unknown cmd");
 	}
+}
+
+void TCP_Server::EntryDelete(Entry* ent) 
+{
+	switch (ent->type) 
+	{
+		case T_ZSET:
+			ent->zset->Dispose();
+			delete ent->zset;
+			break;
+	}
+	delete ent;
+}
+
+// zadd set score name
+void TCP_Server::DoZadd(std::vector<std::string>& cmd, std::string& out)
+{
+	double score = 0;
+	if (!StringToDouble(cmd[2], score)) 
+	{
+		return OutError(out, ERROR_ARG, "expect fp number");
+	}
+
+	// look up or create the zset
+	Entry key;
+	key.key.swap(cmd[1]);
+	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+	HNode* hnode = gdata_.db.HM_Lookup(&key.node, &EntryEq);
+
+	Entry* ent = NULL;
+	if (!hnode) 
+	{
+		ent = new Entry();
+		ent->key.swap(key.key);
+		ent->node.hcode = key.node.hcode;
+		ent->type = T_ZSET;
+		ent->zset = new ZSet();
+		gdata_.db.HM_Insert(&ent->node);
+	}
+	else 
+	{
+		ent = CONTAINER_OF(hnode, Entry, node);
+		if (ent->type != T_ZSET) 
+		{
+			return OutError(out, ERROR_TYPE, "expect zset");
+		}
+	}
+
+	// add or update the tuple
+	const std::string& name = cmd[3];
+	bool added = ent->zset->Add(name.data(), name.size(), score);
+	return OutInt(out, (int64_t)added);
+}
+
+bool TCP_Server::ExpectZset(std::string& out, std::string& s, Entry** ent)
+{
+	Entry key;
+	key.key.swap(s);
+	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+	HNode* hnode = gdata_.db.HM_Lookup(&key.node, &EntryEq);
+	if (!hnode) 
+	{
+		OutNil(out);
+		return false;
+	}
+
+	*ent = CONTAINER_OF(hnode, Entry, node);
+	if ((*ent)->type != T_ZSET) 
+	{
+		OutError(out, ERROR_TYPE, "expect zset");
+		return false;
+	}
+	return true;
+}
+
+// zrem zset name
+void TCP_Server::DoZrem(std::vector<std::string>& cmd, std::string& out)
+{
+	Entry* ent = NULL;
+	if (!ExpectZset(out, cmd[1], &ent)) 
+	{
+		return;
+	}
+
+	const std::string& name = cmd[2];
+	ZNode* znode = ent->zset->Pop(name.data(), name.size());
+	if (znode) 
+	{
+		znode->Destroy(znode);
+	}
+	return OutInt(out, znode ? 1 : 0);
+}
+
+// zscore zset name
+void TCP_Server::DoZscore(std::vector<std::string>& cmd, std::string& out)
+{
+	Entry* ent = NULL;
+	if (!ExpectZset(out, cmd[1], &ent)) 
+	{
+		return;
+	}
+
+	const std::string& name = cmd[2];
+	ZNode* znode = ent->zset->Lookup(name.data(), name.size());
+	return znode ? OutDouble(out, znode->score) : OutNil(out);
+}
+
+// zquery zset score name offset limit
+void TCP_Server::DoZquery(std::vector<std::string>& cmd, std::string& out)
+{
+	// parse args
+	double score = 0;
+	if (!StringToDouble(cmd[2], score)) 
+	{
+		return OutError(out, ERROR_ARG, "expect fp number");
+	}
+	const std::string& name = cmd[3];
+	int64_t offset = 0;
+	int64_t limit = 0;
+	if (!StringToInt(cmd[4], offset)) 
+	{
+		return OutError(out, ERROR_ARG, "expect int");
+	}
+	if (!StringToInt(cmd[5], limit)) 
+	{
+		return OutError(out, ERROR_ARG, "expect int");
+	}
+
+	// get the zset
+	Entry* ent = NULL;
+	if (!ExpectZset(out, cmd[1], &ent)) 
+	{
+		if (out[0] == SERIALIZATION_NIL) 
+		{
+			out.clear();
+			OutArray(out, 0);
+		}
+		return;
+	}
+
+	// look up the tuple
+	if (limit <= 0) 
+	{
+		return OutArray(out, 0);
+	}
+	ZNode* znode = ent->zset->Query(score, name.data(), name.size());
+	znode = ent->zset->Offset(znode, offset);
+
+	// output
+	void* arr = BeginArray(out);
+	uint32_t n = 0;
+	while (znode && (int64_t)n < limit) 
+	{
+		OutString(out, znode->name, znode->length);
+		OutDouble(out, znode->score);
+		znode = ent->zset->Offset(znode, +1);
+		n += 2;
+	}
+	EndArray(out, arr, n);
 }

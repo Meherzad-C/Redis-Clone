@@ -174,7 +174,7 @@ void AVLTree::Add(uint32_t val)
     while (*from) 
     {
         cur = *from;
-        uint32_t node_val = container_of(cur, Data, node)->value;
+        uint32_t node_val = CONTAINER_OF(cur, Data, node)->value;
         from = (val < node_val) ? &cur->left : &cur->right;
     }
     *from = &data->node;
@@ -187,7 +187,7 @@ bool AVLTree::Del(uint32_t val)
     AVLNode* cur = root;
     while (cur) 
     {
-        uint32_t node_val = container_of(cur, Data, node)->value;
+        uint32_t node_val = CONTAINER_OF(cur, Data, node)->value;
         if (val == node_val) 
         {
             break;
@@ -200,7 +200,7 @@ bool AVLTree::Del(uint32_t val)
     }
 
     root = AvlT_Delete(cur);
-    delete container_of(cur, Data, node);
+    delete CONTAINER_OF(cur, Data, node);
     return true;
 }
 
@@ -222,16 +222,16 @@ void AVLTree::AvlT_Verify(AVLNode* parent, AVLNode* node)
     assert(l == r || l + 1 == r || l == r + 1);
     assert(node->depth == 1 + _Max(l, r));
 
-    uint32_t val = container_of(node, Data, node)->value;
+    uint32_t val = CONTAINER_OF(node, Data, node)->value;
     if (node->left) 
     {
         assert(node->left->parent == node);
-        assert(container_of(node->left, Data, node)->value <= val);
+        assert(CONTAINER_OF(node->left, Data, node)->value <= val);
     }
     if (node->right) 
     {
         assert(node->right->parent == node);
-        assert(container_of(node->right, Data, node)->value >= val);
+        assert(CONTAINER_OF(node->right, Data, node)->value >= val);
     }
 }
 
@@ -242,7 +242,7 @@ void AVLTree::AvlT_Extract(AVLNode* node, std::multiset<uint32_t>& extracted)
         return;
     }
     AvlT_Extract(node->left, extracted);
-    extracted.insert(container_of(node, Data, node)->value);
+    extracted.insert(CONTAINER_OF(node, Data, node)->value);
     AvlT_Extract(node->right, extracted);
 }
 
@@ -300,6 +300,6 @@ void AVLTree::Dispose()
     {
         AVLNode* node = root;
         root = AvlT_Delete(root);
-        delete container_of(node, Data, node);
+        delete CONTAINER_OF(node, Data, node);
     }
 }

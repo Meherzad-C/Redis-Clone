@@ -5,10 +5,12 @@
 #include <cassert>
 #include <string>
 #include <vector>
+#include <math.h>
 
 // project includes
 #include "Common/Utility.h"
 #include "Data_Structures/Hashtable/HashMap.h"
+#include "Data_Structures/SortedSet/ZSet.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -39,6 +41,8 @@ private:
     {
         ERROR_UNKNOWN = 1,
         ERROR_TOO_BIG = 2,
+        ERROR_TYPE = 3,
+        ERROR_ARG = 4
     };
 
     enum 
@@ -47,7 +51,14 @@ private:
         SERIALIZATION_ERROR = 1,
         SERIALIZATION_STRING = 2,
         SERIALIZATION_INT = 3,
-        SERIALIZATION_ARRAY = 4,
+        SERIALIZATION_DOUBLE = 4,
+        SERIALIZATION_ARRAY = 5
+    };
+
+    enum 
+    {
+        T_STRING = 0,
+        T_ZSET = 1
     };
 
     typedef struct Conn
@@ -71,12 +82,15 @@ private:
         HMap db;
     } gData;
     static gData gdata_;
+
     // the structure for the key
     typedef struct Entry 
     {
         HNode node;
         std::string key;
         std::string val;
+        uint32_t type = 0;
+        ZSet* zset = nullptr;
     }Entry;
 
 private:
@@ -102,16 +116,26 @@ private:
     static bool EntryEq(HNode* lhs, HNode* rhs);
     static void OutNil(std::string& out);
     static void CbScan(HNode* node, void* arg);
+    static void OutString(std::string& out, const char* s, size_t size);
     static void OutString(std::string& out, const std::string& val);
     static void DoKeys(std::vector<std::string>& cmd, std::string& out);
     static void OutInt(std::string& out, int64_t val);
+    static void OutDouble(std::string& out, double val);
     static void OutError(std::string& out, int32_t code, const std::string& msg);
     static void OutArray(std::string& out, uint32_t n);
+    static void* BeginArray(std::string& out);
+    static void EndArray(std::string& out, void* ctx, uint32_t n);
     static int32_t ParseRequest(const uint8_t* data, size_t len, std::vector<std::string>& out);
     static void DoGet(std::vector<std::string>& cmd, std::string& out);
     static void DoSet(std::vector<std::string>& cmd, std::string& out);
     static void DoDel(std::vector<std::string>& cmd, std::string& out);
     static void DoRequest(std::vector<std::string>& cmd, std::string& out);
+    static void EntryDelete(Entry* ent);
+    static void DoZadd(std::vector<std::string>& cmd, std::string& out);
+    static bool ExpectZset(std::string& out, std::string& s, Entry** ent);
+    static void DoZrem(std::vector<std::string>& cmd, std::string& out);
+    static void DoZscore(std::vector<std::string>& cmd, std::string& out);
+    static void DoZquery(std::vector<std::string>& cmd, std::string& out);
 
 public:
     TCP_Server(int port);

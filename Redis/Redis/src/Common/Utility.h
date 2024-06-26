@@ -1,8 +1,9 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 // Get the address of the containing structure from a pointer to one of its members
-#define container_of(ptr, type, member) \
+#define CONTAINER_OF(ptr, type, member) \
     (reinterpret_cast<type*>( \
         reinterpret_cast<char*>(ptr) - offsetof(type, member) \
     ))
@@ -25,4 +26,18 @@ inline uint32_t _Min(size_t lhs, size_t rhs) {
 inline uint32_t _Max(uint32_t lhs, uint32_t rhs)
 {
 	return lhs < rhs ? rhs : lhs;
+}
+
+inline bool StringToInt(const std::string& s, int64_t& out) 
+{
+	char* endp = NULL;
+	out = strtoll(s.c_str(), &endp, 10);
+	return endp == s.c_str() + s.size();
+}
+
+inline bool StringToDouble(const std::string& s, double& out)
+{
+	char* endp = NULL;
+	out = strtod(s.c_str(), &endp);
+	return endp == s.c_str() + s.size() && !isnan(out);
 }
