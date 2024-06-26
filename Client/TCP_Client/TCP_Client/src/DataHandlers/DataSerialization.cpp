@@ -24,6 +24,8 @@ int32_t DataSerializer::OnResponse(const uint8_t* data, size_t size) {
             return HandleString(data, size);
         case SERIALIZATION_INT:
             return HandleInt(data, size);
+        case SERIALIZATION_DOUBLE:
+            return HandleDouble(data, size);
         case SERIALIZATION_ARRAY:
             return HandleArray(data, size);
         default:
@@ -79,6 +81,20 @@ int32_t DataSerializer::HandleInt(const uint8_t* data, size_t size)
     int64_t val = 0;
     memcpy(&val, &data[1], 8);
     printf("(int) %ld\n", val);
+    return 1 + 8;
+}
+
+int32_t DataSerializer::HandleDouble(const uint8_t* data, size_t size)
+{
+    if (size < 1 + 8) 
+    {
+        Msg("bad response");
+        return -1;
+    }
+
+    double val = 0;
+    memcpy(&val, &data[1], 8);
+    printf("(dbl) %g\n", val);
     return 1 + 8;
 }
 
