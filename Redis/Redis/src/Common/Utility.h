@@ -17,6 +17,11 @@ inline uint64_t StrHash(const uint8_t* data, size_t len)
 	return h;
 }
 
+inline uint32_t _Min(size_t lhs, size_t rhs) {
+
+	return lhs < rhs ? lhs : rhs;
+}
+
 inline uint32_t _Max(uint32_t lhs, uint32_t rhs)
 {
 	return lhs < rhs ? rhs : lhs;

@@ -149,6 +149,8 @@
     <ClInclude Include="Src\Data_Structures\Hashtable\HashMap.h" />
     <ClInclude Include="Src\Data_Structures\Hashtable\HashNode.h" />
     <ClInclude Include="Src\Data_Structures\Hashtable\HashTable.h" />
+    <ClInclude Include="Src\Data_Structures\SortedSet\ZNode.h" />
+    <ClInclude Include="Src\Data_Structures\SortedSet\ZSet.h" />
     <ClInclude Include="Src\TCP_Server.h" />
   </ItemGroup>
   <ItemGroup>
@@ -160,6 +162,8 @@
     <ClCompile Include="Src\Data_Structures\Hashtable\HashMap.cpp" />
     <ClCompile Include="Src\Data_Structures\Hashtable\HashNode.cpp" />
     <ClCompile Include="Src\Data_Structures\Hashtable\HashTable.cpp" />
+    <ClCompile Include="Src\Data_Structures\SortedSet\ZNode.cpp" />
+    <ClCompile Include="Src\Data_Structures\SortedSet\ZSet.cpp" />
     <ClCompile Include="Src\TCP_Server.cpp" />
     <ClCompile Include="TestCases\Test_AVLTree.cpp" />
   </ItemGroup>

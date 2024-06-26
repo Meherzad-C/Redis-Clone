@@ -36,6 +36,12 @@
     <ClInclude Include="Src\Data_Structures\AVLTree\AVLTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Data_Structures\SortedSet\ZNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data_Structures\SortedSet\ZSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\TCP_Server.cpp">
@@ -66,6 +72,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestCases\Test_AVLTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data_Structures\SortedSet\ZNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data_Structures\SortedSet\ZSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
