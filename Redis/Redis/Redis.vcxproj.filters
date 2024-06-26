@@ -80,5 +80,11 @@
     <ClCompile Include="Src\Data_Structures\SortedSet\ZSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TestCases\Test_Offset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TestCases\Test_Cmd.py" />
   </ItemGroup>
 </Project>

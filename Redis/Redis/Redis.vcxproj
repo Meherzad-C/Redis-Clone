@@ -166,6 +166,10 @@
     <ClCompile Include="Src\Data_Structures\SortedSet\ZSet.cpp" />
     <ClCompile Include="Src\TCP_Server.cpp" />
     <ClCompile Include="TestCases\Test_AVLTree.cpp" />
+    <ClCompile Include="TestCases\Test_Offset.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TestCases\Test_Cmd.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
