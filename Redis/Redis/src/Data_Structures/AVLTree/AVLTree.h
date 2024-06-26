@@ -25,6 +25,7 @@ private:
     AVLNode* AvlT_Delete(AVLNode* node);
     void AvlT_Verify(AVLNode* parent, AVLNode* node);
     void AvlT_Extract(AVLNode* node, std::multiset<uint32_t>& extracted);
+    AVLNode* Avlt_Offset(AVLNode* node, int64_t offset);
 
 public:
     AVLTree();

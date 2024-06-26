@@ -246,6 +246,45 @@ void AVLTree::AvlT_Extract(AVLNode* node, std::multiset<uint32_t>& extracted)
     AvlT_Extract(node->right, extracted);
 }
 
+AVLNode* AVLTree::Avlt_Offset(AVLNode* node, int64_t offset)
+{
+    int64_t pos = 0;    // relative to the starting node
+    while (offset != pos) 
+    {
+        if (pos < offset && pos + AvlT_Count(node->right) >= offset) 
+        {
+            // the target is inside the right subtree
+            node = node->right;
+            pos += AvlT_Count(node->left) + 1;
+        }
+        else if (pos > offset && pos - AvlT_Count(node->left) <= offset) 
+        {
+            // the target is inside the left subtree
+            node = node->left;
+            pos -= AvlT_Count(node->right) + 1;
+        }
+        else 
+        {
+            // go to the parent
+            AVLNode* parent = node->parent;
+            if (!parent) 
+            {
+                return NULL;
+            }
+            if (parent->right == node) 
+            {
+                pos -= AvlT_Count(node->left) + 1;
+            }
+            else 
+            {
+                pos += AvlT_Count(node->right) + 1;
+            }
+            node = parent;
+        }
+    }
+    return node;
+}
+
 void AVLTree::Verify(const std::multiset<uint32_t>& ref) 
 {
     AvlT_Verify(nullptr, root);
