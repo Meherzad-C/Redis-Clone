@@ -531,15 +531,15 @@ int32_t TCP_Server::OneRequest(SOCKET connfd)
 	return WriteAll(connfd, wbuff, 4 + len);
 }
 
-void TCP_Server::OutNil(std::string& out) 
-{
-	out.push_back(SERIALIZATION_NIL);
-}
-
 void TCP_Server::CbScan(HNode* node, void* arg)
 {
 	std::string& out = *(std::string*)arg;
 	OutString(out, CONTAINER_OF(node, Entry, node)->key);
+}
+
+void TCP_Server::OutNil(std::string& out) 
+{
+	out.push_back(SERIALIZATION_NIL);
 }
 
 void TCP_Server::OutString(std::string& out, const char* s, size_t size)
@@ -594,7 +594,7 @@ void* TCP_Server::BeginArray(std::string& out)
 {
 	out.push_back(SERIALIZATION_ARRAY);
 	out.append("\0\0\0\0", 4);          // filled in end_arr()
-	return (void*)(out.size() - 4);    // the `ctx` arg
+	return (void*)(out.size() - 4);     // the `ctx` arg
 }
 
 void TCP_Server::EndArray(std::string& out, void* ctx, uint32_t n) 
@@ -760,6 +760,27 @@ void TCP_Server::EntryDelete(Entry* ent)
 	delete ent;
 }
 
+bool TCP_Server::ExpectZset(std::string& out, std::string& s, Entry** ent)
+{
+	Entry key;
+	key.key.swap(s);
+	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+	HNode* hnode = gdata_.db.HM_Lookup(&key.node, &EntryEq);
+	if (!hnode) 
+	{
+		OutNil(out);
+		return false;
+	}
+
+	*ent = CONTAINER_OF(hnode, Entry, node);
+	if ((*ent)->type != T_ZSET) 
+	{
+		OutError(out, ERROR_TYPE, "expect zset");
+		return false;
+	}
+	return true;
+}
+
 // zadd set score name
 void TCP_Server::DoZadd(std::vector<std::string>& cmd, std::string& out)
 {
@@ -798,27 +819,6 @@ void TCP_Server::DoZadd(std::vector<std::string>& cmd, std::string& out)
 	const std::string& name = cmd[3];
 	bool added = ent->zset->Add(name.data(), name.size(), score);
 	return OutInt(out, (int64_t)added);
-}
-
-bool TCP_Server::ExpectZset(std::string& out, std::string& s, Entry** ent)
-{
-	Entry key;
-	key.key.swap(s);
-	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
-	HNode* hnode = gdata_.db.HM_Lookup(&key.node, &EntryEq);
-	if (!hnode) 
-	{
-		OutNil(out);
-		return false;
-	}
-
-	*ent = CONTAINER_OF(hnode, Entry, node);
-	if ((*ent)->type != T_ZSET) 
-	{
-		OutError(out, ERROR_TYPE, "expect zset");
-		return false;
-	}
-	return true;
 }
 
 // zrem zset name

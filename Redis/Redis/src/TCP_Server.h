@@ -90,7 +90,7 @@ private:
         std::string key;
         std::string val;
         uint32_t type = 0;
-        ZSet* zset = nullptr;
+        ZSet* zset = NULL;
     }Entry;
 
 private:
@@ -114,8 +114,8 @@ private:
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
     static bool EntryEq(HNode* lhs, HNode* rhs);
-    static void OutNil(std::string& out);
     static void CbScan(HNode* node, void* arg);
+    static void OutNil(std::string& out);
     static void OutString(std::string& out, const char* s, size_t size);
     static void OutString(std::string& out, const std::string& val);
     static void DoKeys(std::vector<std::string>& cmd, std::string& out);

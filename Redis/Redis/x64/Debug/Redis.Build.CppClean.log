@@ -1,5 +1,6 @@
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\vc143.pdb
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\vc143.idb
+c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\test_offset.obj
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\test_avltree.obj
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\tcp_server.obj
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\zset.obj
@@ -11,8 +12,8 @@ c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\avlnode.obj
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\application.obj
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\main.obj
-c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\redis.ilk
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\x64\debug\redis.exe
+c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\redis.ilk
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\x64\debug\redis.pdb
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\redis.tlog\cl.command.1.tlog
 c:\users\ltxme\desktop\other\hw\programmingprojects\redis\redis\redis\x64\debug\redis.tlog\cl.read.1.tlog

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <iostream>
 
 // project includes
 #include "..\AVLTree\AVLTree.h"
@@ -20,7 +21,7 @@ class ZNode
 {
 public:
     AVLNode node;
-    AVLTree tree;
+    AVLTree* tree;
     HNode hmap;
     double score = 0;
     size_t length = 0;

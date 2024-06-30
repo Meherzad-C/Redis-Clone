@@ -138,6 +138,9 @@
     <ClCompile Include="src\DataHandlers\DataSerialization.cpp" />
     <ClCompile Include="src\TCP_Client.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="testcases\Test_Cmd.py" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

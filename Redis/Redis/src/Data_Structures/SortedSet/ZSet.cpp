@@ -45,7 +45,7 @@ void ZSet::ZTree_Add(ZNode* node)
     }
     *from = &node->node;
     node->node.parent = cur;
-    this->node = node->tree.AvlT_Fix(&node->node);
+    this->node = node->tree->AvlT_Fix(&node->node);
 }
 
 void ZSet::ZTree_Dispose(AVLNode* node) 
@@ -68,9 +68,9 @@ bool ZSet::Add(const char* name, size_t len, double score)
         {
             return false;
         }
-        this->node = node->tree.AvlT_Delete(&node->node);
+        this->node = node->tree->AvlT_Delete(&node->node);
         node->score = score;
-        node->tree.Init(&node->node);
+        node->tree->Init(&node->node);
         ZTree_Add(node);
         return false;
     }
@@ -116,7 +116,7 @@ ZNode* ZSet::Pop(const char* name, size_t len)
     }
 
     ZNode* node = CONTAINER_OF(found, ZNode, hmap);
-    this->node = node->tree.AvlT_Delete(&node->node);
+    this->node = node->tree->AvlT_Delete(&node->node);
     return node;
 }
 
@@ -141,7 +141,7 @@ ZNode* ZSet::Query(double score, const char* name, size_t len)
 
 ZNode* ZSet::Offset(ZNode* node, int64_t offset) 
 {
-    AVLNode* tnode = node ? node->tree.Avlt_Offset(&node->node, offset) : nullptr;
+    AVLNode* tnode = node ? node->tree->Avlt_Offset(&node->node, offset) : nullptr;
     return tnode ? CONTAINER_OF(tnode, ZNode, tree) : nullptr;
 }
 

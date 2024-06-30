@@ -18,9 +18,9 @@
 //    AVLNode* root = NULL;
 //};
 //
-//static void add(Container& c, uint32_t val) 
+//static void add(Container& c, uint32_t val, Data* data) 
 //{
-//    Data* data = new Data();
+//    data = new Data();
 //    data->tree.Init(&data->node);
 //    data->val = val;
 //
@@ -59,11 +59,11 @@
 //
 //static void test_case(uint32_t sz) 
 //{
-//    Data* data;
+//    Data* data{};
 //    Container c;
 //    for (uint32_t i = 0; i < sz; ++i) 
 //    {
-//        add(c, i);
+//        add(c, i, data);
 //    }
 //
 //    AVLNode* min = c.root;
@@ -91,8 +91,12 @@
 //
 //int main() 
 //{
-//    for (uint32_t i = 1; i < 500; ++i) {
+//    for (uint32_t i = 1; i <= 500; ++i) {
 //        test_case(i);
 //    }
 //    return 0;
 //}
+
+//----------------------------
+// Test case result? : Passed
+//----------------------------

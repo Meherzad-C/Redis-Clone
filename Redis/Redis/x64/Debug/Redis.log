@@ -1,39 +1,15 @@
-﻿  Application.cpp
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Common\Utility.h(23,30): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Data_Structures\SortedSet\ZNode.h(27,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Data_Structures\SortedSet\ZNode.h(27,10): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
-  Main.cpp
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Common\Utility.h(23,30): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Data_Structures\SortedSet\ZNode.h(27,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Data_Structures\SortedSet\ZNode.h(27,10): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
-  Application.h
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Common\Utility.h(23,30): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Data_Structures\SortedSet\ZNode.h(27,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\src\Data_Structures\SortedSet\ZNode.h(27,10): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
-  AVLNode.cpp
-  AVLTree.cpp
+﻿  ZSet.cpp
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Common\Utility.h(23,30): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-  HashMap.cpp
-  HashNode.cpp
-  HashTable.cpp
-  ZNode.cpp
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Common\Utility.h(23,30): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(27,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(27,10): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
-  ZSet.cpp
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Common\Utility.h(23,30): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(27,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(27,10): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(28,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(28,10): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
   TCP_Server.cpp
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Common\Utility.h(23,30): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(27,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
-C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(27,10): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(28,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
+C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Data_Structures\SortedSet\ZNode.h(28,10): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(145,37): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(300,68): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(344,76): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(444,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\TCP_Server.cpp(464,34): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Test_AVLTree.cpp
   Generating Code...
-x64\Debug\Application.obj : warning LNK4042: object specified more than once; extras ignored
   Redis.vcxproj -> C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\x64\Debug\Redis.exe
