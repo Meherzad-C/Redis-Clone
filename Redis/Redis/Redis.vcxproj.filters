@@ -42,6 +42,9 @@
     <ClInclude Include="Src\Data_Structures\SortedSet\ZSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Data_Structures\LinkedList\Linkedlist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\TCP_Server.cpp">
@@ -81,6 +84,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TestCases\Test_Offset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data_Structures\LinkedList\Linkedlist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
