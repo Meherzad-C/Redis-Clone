@@ -6,11 +6,14 @@
 #include <string>
 #include <vector>
 #include <math.h>
+#include <time.h>
+#include <windows.h>
 
 // project includes
 #include "Common/Utility.h"
 #include "Data_Structures/Hashtable/HashMap.h"
 #include "Data_Structures/SortedSet/ZSet.h"
+#include "Data_Structures/LinkedList/Linkedlist.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -21,6 +24,7 @@ private:
 	SOCKET fd;
     static const size_t kMaxMsg{ 4096 };
     static const size_t kMaxArgs{ 1024 };
+    static const uint64_t kIdleTimeout_ms = 5 * 1000;
 
     enum
     {
@@ -28,14 +32,6 @@ private:
         STATE_RESPONSE = 1,
         STATE_END = 2
     };
-
-    // del this enum code
-    /*enum
-    {
-        RESPONSE_OK = 0,
-        RESPONSE_ERROR = 1,
-        RESPONSE_NOT_FOUND = 2
-    };*/
 
     enum 
     {
@@ -72,15 +68,25 @@ private:
         size_t wbuff_size = 0;
         size_t wbuff_sent = 0;
         uint8_t wbuff[4 + kMaxMsg];
+        // timer
+        uint64_t idle_start = 0;
+        // each connection has their own idleList
+        DList idleList;
     }Conn;
 
-    std::vector<Conn*> fd2conn;
+    static std::vector<Conn*> fd2conn;
 
     // The data structure for the key space.
     typedef struct gData
     {
         HMap db;
+        DList idleList; 
+        // this node acts as the head of the doubly linked list
+        // and does not represent any connection itself.
+        // It is a placeholder to make list operations easier.
+        //DList idleList; 
     } gData;
+
     static gData gdata_;
 
     // the structure for the key
@@ -109,10 +115,14 @@ private:
     void ConnectionIO(Conn* conn);
     static void SetNonBlockingFD(SOCKET fd);
     static void ConnPut(std::vector<Conn*>& fd2conn, Conn* conn);
-    static int32_t AcceptNewConnection(std::vector<Conn*>& fd2conn, int fd);
+    static int32_t AcceptNewConnection(int fd);
     static int32_t OneRequest(SOCKET connfd);
     static int32_t ReadFull(SOCKET fd, char* buff, size_t n);
     static int32_t WriteAll(SOCKET fd, const char* buff, size_t n);
+    static uint64_t GetMonotonicUsec();
+    static uint32_t NextTimerMs();
+    static void ConnDone(Conn* conn);
+    static void ProcessTimers();
     static bool EntryEq(HNode* lhs, HNode* rhs);
     static void CbScan(HNode* node, void* arg);
     static void OutNil(std::string& out);

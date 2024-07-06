@@ -9,6 +9,7 @@
 #define CMD_IS(word, cmd) (_stricmp((word).c_str(), (cmd)) == 0)
 
 TCP_Server::gData TCP_Server::gdata_;
+std::vector<TCP_Server::Conn*> TCP_Server::fd2conn;
 
 // ==============================
 //	Constructors and Destructors
@@ -102,7 +103,6 @@ void TCP_Server::HandleConnections()
 
 		FD_SET(this->fd, &readfds);
 		FD_SET(this->fd, &exceptfds);
-
 		SOCKET maxfd = this->fd;
 		for (const auto& pConn : this->fd2conn)
 		{
@@ -126,8 +126,9 @@ void TCP_Server::HandleConnections()
 		}
 
 		timeval timeout;
-		timeout.tv_sec = 1;
-		timeout.tv_usec = 0;
+		uint32_t timeout_ms = NextTimerMs();
+		timeout.tv_sec = timeout_ms / 1000; // Whole seconds
+		timeout.tv_usec = (timeout_ms % 1000) * 1000; // Remaining microseconds
 
 		int rv = select(static_cast<int>(maxfd + 1), &readfds, &writefds, &exceptfds, &timeout);
 		if (rv == SOCKET_ERROR)
@@ -135,16 +136,16 @@ void TCP_Server::HandleConnections()
 			Die("select()");
 		}
 
-		if (rv == 0)
+		/*if (rv == 0)
 		{
 			continue;
-		}
+		}*/
 
 		if (FD_ISSET(this->fd, &readfds))
 		{
-			AcceptNewConnection(fd2conn, this->fd);
+			AcceptNewConnection(this->fd);
 		}
-
+		
 		for (auto it = this->fd2conn.begin(); it != this->fd2conn.end(); )
 		{
 			auto& pConn = *it;
@@ -165,14 +166,15 @@ void TCP_Server::HandleConnections()
 
 				if (pConn->state == STATE_END)
 				{
-					closesocket(pConn->fd);
-					delete pConn;
+					ConnDone(pConn);
 					it = this->fd2conn.erase(it);
 					continue;
 				}
 			}
 			++it;
 		}
+		// handle timers
+		ProcessTimers();
 	}
 }
 
@@ -374,6 +376,13 @@ bool TCP_Server::TryFlushBuffer(Conn* conn)
 
 void TCP_Server::ConnectionIO(Conn* conn)
 {
+	// woke up by poll, update the idle timer
+	// by moving conn to the end of the list.
+	conn->idle_start = GetMonotonicUsec();
+	conn->idleList.Detach();
+	gdata_.idleList.Insert_Before(&conn->idleList);
+
+	// do the work
 	if (conn->state == STATE_REQUEST)
 	{
 		StateRequest(conn);
@@ -390,7 +399,7 @@ void TCP_Server::ConnectionIO(Conn* conn)
 	}
 }
 
-int32_t TCP_Server::AcceptNewConnection(std::vector<Conn*>& fd2conn, int fd)
+int32_t TCP_Server::AcceptNewConnection(int fd)
 {
 	struct sockaddr_in clientAddr = {};
 	int clientAddrLen = sizeof(clientAddr);
@@ -420,6 +429,8 @@ int32_t TCP_Server::AcceptNewConnection(std::vector<Conn*>& fd2conn, int fd)
 	conn->wbuff_size = 0;
 	conn->wbuff_sent = 0;
 
+	conn->idle_start = GetMonotonicUsec();
+	gdata_.idleList.Insert_Before(&conn->idleList);
 	ConnPut(fd2conn, conn);
 
 	return 0;
@@ -473,6 +484,64 @@ int32_t TCP_Server::WriteAll(SOCKET fd, const char* buff, size_t n)
 		buff += rv;
 	}
 	return 0;
+}
+
+uint64_t TCP_Server::GetMonotonicUsec()
+{
+	LARGE_INTEGER frequency;
+	LARGE_INTEGER counter;
+
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&counter);
+
+	// Convert to microseconds
+	return (counter.QuadPart * 1000000) / frequency.QuadPart;
+}
+
+uint32_t TCP_Server::NextTimerMs()
+{
+	if (gdata_.idleList.Empty()) 
+	{
+		// no timer, the value doesn't matter
+		return 10000;   
+	}
+
+	uint64_t now_us = GetMonotonicUsec();
+	Conn* next = CONTAINER_OF(gdata_.idleList.next, Conn, idleList);
+	uint64_t next_us = next->idle_start + kIdleTimeout_ms * 1000;
+	if (next_us <= now_us) 
+	{
+		// missed?
+		return 0;
+	}
+	uint32_t timeout_ms = (uint32_t)((next_us - now_us) / 1000);
+	return timeout_ms;
+}
+
+void TCP_Server::ConnDone(Conn* conn)
+{
+	fd2conn[conn->fd] = nullptr;
+	closesocket(conn->fd);
+	conn->idleList.Detach();
+	delete conn;
+}
+
+void TCP_Server::ProcessTimers()
+{
+	uint64_t now_us = GetMonotonicUsec();
+	while (!gdata_.idleList.Empty()) 
+	{
+		Conn* next = CONTAINER_OF(gdata_.idleList.next, Conn, idleList);
+		uint64_t next_us = next->idle_start + kIdleTimeout_ms * 1000;
+		if (next_us >= now_us + 1000) 
+		{
+			// not ready, the extra 1000us is for the ms resolution of poll()
+			break;
+		}
+
+		printf("removing idle connection: %d\n", next->fd);
+		ConnDone(next);
+	}
 }
 
 bool TCP_Server::EntryEq(HNode* lhs, HNode* rhs)
