@@ -16,6 +16,8 @@ C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Common
   HashMap.cpp
   HashNode.cpp
   HashTable.cpp
+  Heap.cpp
+  HeapItem.cpp
   Linkedlist.cpp
   ZNode.cpp
 C:\Users\ltxme\Desktop\Other\HW\ProgrammingProjects\Redis\Redis\Redis\Src\Common\Utility.h(23,30): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data

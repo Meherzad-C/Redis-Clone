@@ -45,6 +45,12 @@
     <ClInclude Include="Src\Data_Structures\LinkedList\Linkedlist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Data_Structures\Heap\HeapItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Data_Structures\Heap\Heap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\TCP_Server.cpp">
@@ -87,6 +93,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Data_Structures\LinkedList\Linkedlist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data_Structures\Heap\HeapItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Data_Structures\Heap\Heap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
