@@ -172,6 +172,7 @@
     <ClCompile Include="Src\Data_Structures\SortedSet\ZSet.cpp" />
     <ClCompile Include="Src\TCP_Server.cpp" />
     <ClCompile Include="TestCases\Test_AVLTree.cpp" />
+    <ClCompile Include="TestCases\Test_Heap.cpp" />
     <ClCompile Include="TestCases\Test_Offset.cpp" />
   </ItemGroup>
   <ItemGroup>

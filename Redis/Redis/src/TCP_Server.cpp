@@ -500,22 +500,34 @@ uint64_t TCP_Server::GetMonotonicUsec()
 
 uint32_t TCP_Server::NextTimerMs()
 {
-	if (gdata_.idleList.Empty()) 
+	uint64_t now_us = GetMonotonicUsec();
+	uint64_t next_us = (uint64_t)-1;
+
+	// idle timers
+	if (!gdata_.idleList.Empty()) 
+	{
+		Conn* next = CONTAINER_OF(gdata_.idleList.next, Conn, idleList);
+		next_us = next->idle_start + kIdleTimeout_ms * 1000;
+	}
+
+	// ttl timers
+	if (!gdata_.heap.Empty() && gdata_.heap.AccessElement(0).val < next_us) 
+	{
+		next_us = gdata_.heap.AccessElement(0).val;
+	}
+
+	if (next_us == (uint64_t)-1) 
 	{
 		// no timer, the value doesn't matter
 		return 10000;   
 	}
 
-	uint64_t now_us = GetMonotonicUsec();
-	Conn* next = CONTAINER_OF(gdata_.idleList.next, Conn, idleList);
-	uint64_t next_us = next->idle_start + kIdleTimeout_ms * 1000;
 	if (next_us <= now_us) 
 	{
 		// missed?
 		return 0;
 	}
-	uint32_t timeout_ms = (uint32_t)((next_us - now_us) / 1000);
-	return timeout_ms;
+	return (uint32_t)((next_us - now_us) / 1000);
 }
 
 void TCP_Server::ConnDone(Conn* conn)
@@ -528,20 +540,115 @@ void TCP_Server::ConnDone(Conn* conn)
 
 void TCP_Server::ProcessTimers()
 {
-	uint64_t now_us = GetMonotonicUsec();
-	while (!gdata_.idleList.Empty()) 
+	// the extra 1000us is for the ms resolution of poll()
+	uint64_t now_us = GetMonotonicUsec() + 1000;
+
+	// idle timers
+	while (!gdata_.idleList.Empty())
 	{
 		Conn* next = CONTAINER_OF(gdata_.idleList.next, Conn, idleList);
 		uint64_t next_us = next->idle_start + kIdleTimeout_ms * 1000;
-		if (next_us >= now_us + 1000) 
+		if (next_us >= now_us) 
 		{
-			// not ready, the extra 1000us is for the ms resolution of poll()
+			// not ready
 			break;
 		}
 
 		printf("removing idle connection: %d\n", next->fd);
 		ConnDone(next);
 	}
+
+	// TTL timers
+	const size_t k_max_works = 2000;
+	size_t nworks = 0;
+	while (!gdata_.idleList.Empty() && gdata_.heap.AccessElement(0).val < now_us) 
+	{
+		Entry* ent = CONTAINER_OF(gdata_.heap.AccessElement(0).ref, Entry, heapIdx);
+		HNode* node = gdata_.db.HM_Pop(&ent->node, &PointerEqual);
+		assert(node == &ent->node);
+		EntryDelete(ent);
+		if (nworks++ >= k_max_works) 
+		{
+			// don't stall the server if too many keys are expiring at once
+			break;
+		}
+	}
+}
+
+// set or remove the TTL
+void TCP_Server::EntrySetTTL(Entry* ent, int64_t ttl_ms)
+{
+	if (ttl_ms < 0 && ent->heapIdx != (size_t)-1) 
+	{
+		// erase an item from the heap
+		// by replacing it with the last item in the array.
+		size_t pos = ent->heapIdx;
+		gdata_.heap.AccessElement(pos) = gdata_.heap.Back();
+		gdata_.heap.Pop();
+		if (pos < gdata_.heap.Size()) 
+		{
+			gdata_.heap.Update(pos);
+		}
+		ent->heapIdx = -1;
+	}
+	else if (ttl_ms >= 0) 
+	{
+		size_t pos = ent->heapIdx;
+		if (pos == (size_t)-1) 
+		{
+			// add an new item to the heap
+			HeapItem item;
+			item.ref = &ent->heapIdx;
+			gdata_.heap.Push(item);
+			pos = gdata_.heap.Size() - 1;
+		}
+		gdata_.heap.AccessElement(pos).val = GetMonotonicUsec() + (uint64_t)ttl_ms * 1000;
+		gdata_.heap.Update(pos);
+	}
+}
+
+void TCP_Server::DoExpire(std::vector<std::string>& cmd, std::string& out)
+{
+	int64_t ttl_ms = 0;
+	if (!StringToInt(cmd[2], ttl_ms))
+	{
+		return OutError(out, ERROR_ARG, "expect int64");
+	}
+
+	Entry key;
+	key.key.swap(cmd[1]);
+	key.node.hcode = StringHash((uint8_t*)key.key.data(), key.key.size());
+
+	HNode* node = gdata_.db.HM_Lookup(&key.node, &EntryEq);
+	if (node) 
+	{
+		Entry* ent = CONTAINER_OF(node, Entry, node);
+		EntrySetTTL(ent, ttl_ms);
+	}
+	return OutInt(out, node ? 1 : 0);
+}
+
+void TCP_Server::DoTTL(std::vector<std::string>& cmd, std::string& out)
+{
+	Entry key;
+	key.key.swap(cmd[1]);
+	key.node.hcode = StringHash((uint8_t*)key.key.data(), key.key.size());
+
+	HNode* node = gdata_.db.HM_Lookup(&key.node, &EntryEq);
+	if (!node) 
+	{
+		return OutInt(out, -2);
+	}
+
+	Entry* ent = CONTAINER_OF(node, Entry, node);
+	if (ent->heapIdx == (size_t)-1) 
+	{
+		return OutInt(out, -1);
+	}
+
+	uint64_t expire_at = gdata_.heap.AccessElement(ent->heapIdx).val;
+	uint64_t now_us = GetMonotonicUsec();
+	return OutInt(out, expire_at > now_us ? (expire_at - now_us) / 1000 : 0);
 }
 
 bool TCP_Server::EntryEq(HNode* lhs, HNode* rhs)
@@ -717,7 +824,7 @@ void TCP_Server::DoGet(std::vector<std::string>& cmd, std::string& out)
 	Entry key;
 	// gData gdata_;
 	key.key.swap(cmd[1]);
-	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+	key.node.hcode = StringHash((uint8_t*)key.key.data(), key.key.size());
 
 	HNode* node = gdata_.db.HM_Lookup(&key.node, &EntryEq);
 	if (!node) 
@@ -738,7 +845,7 @@ void TCP_Server::DoSet(std::vector<std::string>& cmd, std::string& out)
 	Entry key;
 	// gData gdata_;
 	key.key.swap(cmd[1]);
-	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+	key.node.hcode = StringHash((uint8_t*)key.key.data(), key.key.size());
 
 	HNode* node = gdata_.db.HM_Lookup(&key.node, &EntryEq);
 	if (node) 
@@ -765,7 +872,7 @@ void TCP_Server::DoDel(std::vector<std::string>& cmd, std::string& out)
 	Entry key;
 	// gData gdata_;
 	key.key.swap(cmd[1]);
-	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+	key.node.hcode = StringHash((uint8_t*)key.key.data(), key.key.size());
 
 	HNode* node = gdata_.db.HM_Pop(&key.node, &EntryEq);
 	if (node) 
@@ -793,6 +900,14 @@ void TCP_Server::DoRequest(std::vector<std::string>& cmd, std::string& out)
 	else if (cmd.size() == 2 && CMD_IS(cmd[0], "del")) 
 	{
 		DoDel(cmd, out);
+	}
+	else if (cmd.size() == 3 && CMD_IS(cmd[0], "pexpire")) 
+	{
+		DoExpire(cmd, out);
+	}
+	else if (cmd.size() == 2 && CMD_IS(cmd[0], "pttl"))
+	{
+		DoTTL(cmd, out);
 	}
 	else if (cmd.size() == 4 && CMD_IS(cmd[0], "zadd"))
 	{
@@ -826,6 +941,7 @@ void TCP_Server::EntryDelete(Entry* ent)
 			delete ent->zset;
 			break;
 	}
+	EntrySetTTL(ent, -1);
 	delete ent;
 }
 
@@ -833,7 +949,7 @@ bool TCP_Server::ExpectZset(std::string& out, std::string& s, Entry** ent)
 {
 	Entry key;
 	key.key.swap(s);
-	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+	key.node.hcode = StringHash((uint8_t*)key.key.data(), key.key.size());
 	HNode* hnode = gdata_.db.HM_Lookup(&key.node, &EntryEq);
 	if (!hnode) 
 	{
@@ -862,7 +978,7 @@ void TCP_Server::DoZadd(std::vector<std::string>& cmd, std::string& out)
 	// look up or create the zset
 	Entry key;
 	key.key.swap(cmd[1]);
-	key.node.hcode = StrHash((uint8_t*)key.key.data(), key.key.size());
+	key.node.hcode = StringHash((uint8_t*)key.key.data(), key.key.size());
 	HNode* hnode = gdata_.db.HM_Lookup(&key.node, &EntryEq);
 
 	Entry* ent = NULL;

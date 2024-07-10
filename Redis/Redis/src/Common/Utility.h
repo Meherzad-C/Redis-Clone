@@ -8,7 +8,7 @@
         reinterpret_cast<char*>(ptr) - offsetof(type, member) \
     ))
 
-inline uint64_t StrHash(const uint8_t* data, size_t len)
+inline uint64_t StringHash(const uint8_t* data, size_t len)
 {
 	uint32_t h = 0x811C9DC5;
 	for (size_t i = 0; i < len; i++) 
@@ -40,4 +40,10 @@ inline bool StringToDouble(const std::string& s, double& out)
 	char* endp = NULL;
 	out = strtod(s.c_str(), &endp);
 	return endp == s.c_str() + s.size() && !isnan(out);
+}
+
+template <typename T>
+inline bool PointerEqual(T* lhs, T* rhs)
+{
+	return lhs == rhs;
 }

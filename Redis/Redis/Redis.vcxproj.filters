@@ -101,6 +101,9 @@
     <ClCompile Include="Src\Data_Structures\Heap\Heap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TestCases\Test_Heap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="TestCases\Test_Cmd.py" />

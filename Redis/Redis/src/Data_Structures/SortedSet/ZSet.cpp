@@ -91,7 +91,7 @@ ZNode* ZSet::Lookup(const char* name, size_t len)
     }
 
     HKey key;
-    key.node.hcode = StrHash((uint8_t*)name, len);
+    key.node.hcode = StringHash((uint8_t*)name, len);
     key.name = name;
     key.len = len;
     HNode* found = hmap.HM_Lookup(&key.node, &ZHashCompare);
@@ -106,7 +106,7 @@ ZNode* ZSet::Pop(const char* name, size_t len)
     }
 
     HKey key;
-    key.node.hcode = StrHash((uint8_t*)name, len);
+    key.node.hcode = StringHash((uint8_t*)name, len);
     key.name = name;
     key.len = len;
     HNode* found = hmap.HM_Pop(&key.node, &ZHashCompare);

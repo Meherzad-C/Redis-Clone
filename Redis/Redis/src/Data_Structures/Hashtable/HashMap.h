@@ -27,6 +27,7 @@ public:
     void HM_Insert(HNode* node);
     HNode* HM_Pop(HNode* key, bool (*eq)(HNode*, HNode*));
     size_t HM_Size() const;
+    bool HM_HNodeSame(HNode* lhs, HNode* rhs);
     void HM_Scan(HTableType ht, void (*f)(HNode*, void*), void* arg);
     void HM_HelpResizing();
     void HM_StartResizing();

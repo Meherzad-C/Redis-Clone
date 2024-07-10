@@ -14,6 +14,7 @@
 #include "Data_Structures/Hashtable/HashMap.h"
 #include "Data_Structures/SortedSet/ZSet.h"
 #include "Data_Structures/LinkedList/Linkedlist.h"
+#include "Data_Structures/Heap/Heap.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -80,11 +81,10 @@ private:
     typedef struct gData
     {
         HMap db;
+        // timers for idle connections
         DList idleList; 
-        // this node acts as the head of the doubly linked list
-        // and does not represent any connection itself.
-        // It is a placeholder to make list operations easier.
-        //DList idleList; 
+        // timers for TTL
+        Heap heap;
     } gData;
 
     static gData gdata_;
@@ -97,6 +97,8 @@ private:
         std::string val;
         uint32_t type = 0;
         ZSet* zset = NULL;
+        // for TTLs
+        size_t heapIdx = -1;
     }Entry;
 
 private:
@@ -123,6 +125,9 @@ private:
     static uint32_t NextTimerMs();
     static void ConnDone(Conn* conn);
     static void ProcessTimers();
+    static void EntrySetTTL(Entry* ent, int64_t ttl_ms);
+    static void DoExpire(std::vector<std::string>& cmd, std::string& out);
+    static void DoTTL(std::vector<std::string>& cmd, std::string& out);
     static bool EntryEq(HNode* lhs, HNode* rhs);
     static void CbScan(HNode* node, void* arg);
     static void OutNil(std::string& out);

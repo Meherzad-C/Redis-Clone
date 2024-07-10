@@ -50,7 +50,7 @@ void Heap::HeapDown(size_t pos)
         // find the smallest one among the parent and their kids
         size_t l = Left(pos);
         size_t r = Right(pos);
-        size_t min_pos = pos;
+        size_t min_pos = -1;
         size_t min_val = t.val;
         if (l < len && data[l].val < min_val) 
         {
@@ -61,7 +61,7 @@ void Heap::HeapDown(size_t pos)
         {
             min_pos = r;
         }
-        if (min_pos == pos) 
+        if (min_pos == (size_t)-1) 
         {
             break;
         }
@@ -77,26 +77,80 @@ void Heap::HeapDown(size_t pos)
 void Heap::Push(HeapItem item) 
 {
     data.push_back(item);
-    HeapUp(data.size() - 1);
 }
 
-HeapItem Heap::Pop() 
+void Heap::Pop()
 {
-    if (data.empty()) 
-    {
-        return HeapItem(); // or throw an exception
-    }
-    HeapItem top = data.front();
-    data[0] = data.back();
-    data.pop_back();
     if (!data.empty()) 
     {
-        HeapDown(0);
+        data.pop_back();
     }
-    return top;
+    else
+    {
+    throw std::out_of_range("Heap is empty");
+    }
 }
 
 size_t Heap::Size() const 
 {
     return data.size();
+}
+
+HeapItem& Heap::Front() 
+{
+    if (!data.empty()) 
+    {
+        return data.front();
+    }
+    throw std::out_of_range("Heap is empty");
+}
+
+const HeapItem& Heap::Front() const 
+{
+    if (!data.empty()) 
+    {
+        return data.front();
+    }
+    throw std::out_of_range("Heap is empty");
+}
+
+HeapItem& Heap::Back() 
+{
+    if (!data.empty()) 
+    {
+        return data.back();
+    }
+    throw std::out_of_range("Heap is empty");
+}
+
+const HeapItem& Heap::Back() const 
+{
+    if (!data.empty()) 
+    {
+        return data.back();
+    }
+    throw std::out_of_range("Heap is empty");
+}
+
+HeapItem& Heap::AccessElement(size_t pos) 
+{
+    if (pos < data.size()) 
+    {
+        return data[pos];
+    }
+    throw std::out_of_range("Position out of bounds");
+}
+
+const HeapItem& Heap::AccessElement(size_t pos) const 
+{
+    if (pos < data.size()) 
+    {
+        return data[pos];
+    }
+    throw std::out_of_range("Position out of bounds");
+}
+
+bool Heap::Empty() const
+{
+    return data.empty();
 }

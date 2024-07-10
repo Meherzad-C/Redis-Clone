@@ -66,6 +66,11 @@ size_t HMap::HM_Size() const
     return ht1.size + ht2.size;
 }
 
+bool HMap::HM_HNodeSame(HNode* lhs, HNode* rhs)
+{
+    return lhs == rhs;
+}
+
 void HMap::HM_Scan(HTableType ht, void(*f)(HNode*, void*), void* arg)
 {
     if (ht == HTableType::PRIMARY_HT1)
