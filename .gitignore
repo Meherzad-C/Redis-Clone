@@ -4,7 +4,6 @@
 *.user
 *.userosscache
 *.docstates
-*.vcxproj
 *.filters
 
 # Build results
