@@ -5,6 +5,7 @@
 *.userosscache
 *.docstates
 *.vcxproj
+*.filters
 
 # Build results
 [Dd]ebug/
