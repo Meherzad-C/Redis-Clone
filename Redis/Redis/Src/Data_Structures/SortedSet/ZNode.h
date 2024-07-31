@@ -17,6 +17,7 @@ struct HKey
     size_t len = 0;
 };
 
+// ZNode for ZSet
 class ZNode 
 {
 public:

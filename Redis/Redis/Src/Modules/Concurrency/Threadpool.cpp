@@ -1,28 +1,12 @@
-#include "Threadpool.h"
+#include "ThreadPool.h"
 
-ThreadPool::ThreadPool(size_t numThreads) 
+ThreadPool::ThreadPool(size_t numThreads) : numThreads(numThreads)
 {
     assert(numThreads > 0);
     threads.reserve(numThreads);
     for (size_t i = 0; i < numThreads; ++i) 
     {
         threads.emplace_back(&ThreadPool::Worker, this);
-    }
-}
-
-ThreadPool::~ThreadPool() 
-{
-    {
-        std::unique_lock<std::mutex> lock(mtx);
-        stop = true;
-    }
-    notEmpty.notify_all();
-    for (std::thread& thread : threads) 
-    {
-        if (thread.joinable()) 
-        {
-            thread.join();
-        }
     }
 }
 
@@ -51,5 +35,21 @@ void ThreadPool::Worker()
             queue.pop_front();
         }
         w.f(w.arg);
+    }
+}
+
+ThreadPool::~ThreadPool() 
+{
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        stop = true;
+    }
+    notEmpty.notify_all();
+    for (std::thread& thread : threads) 
+    {
+        if (thread.joinable()) 
+        {
+            thread.join();
+        }
     }
 }

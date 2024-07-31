@@ -8,6 +8,7 @@
 #include <functional>
 #include <cassert>
 
+// This ThreadPool is based on Producer-Consumer Pattern
 class ThreadPool 
 {
 public:
@@ -22,6 +23,7 @@ private:
     std::deque<Work> queue;
     std::mutex mtx;
     std::condition_variable notEmpty;
+    size_t numThreads;
     bool stop = false;
 
 private:

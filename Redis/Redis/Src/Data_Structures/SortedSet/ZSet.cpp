@@ -145,6 +145,11 @@ ZNode* ZSet::Offset(ZNode* node, int64_t offset)
     return tnode ? CONTAINER_OF(tnode, ZNode, node) : nullptr;
 }
 
+const HMap& ZSet::GetHashMapReference()const
+{
+    return this->hmap;
+}
+
 void ZSet::Dispose() 
 {
     ZTree_Dispose(this->node);

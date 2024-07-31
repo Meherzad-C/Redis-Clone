@@ -2,8 +2,8 @@
 
 #include "HashTable.h"
 
-// the real hashtable interface.
-// it uses 2 hashtables for progressive resizing.
+// The real hashtable interface.
+// It uses 2 hashtables for progressive resizing.
 class HMap 
 {
 private:

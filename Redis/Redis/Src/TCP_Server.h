@@ -15,9 +15,11 @@
 #include "Data_Structures/SortedSet/ZSet.h"
 #include "Data_Structures/LinkedList/Linkedlist.h"
 #include "Data_Structures/Heap/Heap.h"
+#include "Modules/Concurrency/ThreadPool.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
+// TODO: refactor this class. (P1)
 class TCP_Server
 {
 private:
@@ -25,7 +27,7 @@ private:
 	SOCKET fd;
     static const size_t kMaxMsg{ 4096 };
     static const size_t kMaxArgs{ 1024 };
-    static const uint64_t kIdleTimeout_ms = 5 * 1000;
+    static const uint64_t kIdleTimeout_ms{ 5 * 1000 };
 
     enum
     {
@@ -60,17 +62,18 @@ private:
 
     typedef struct Conn
     {
-        SOCKET fd = INVALID_SOCKET;
-        uint32_t state = 0; // either STATE_REQUEST or STATE_RESPONSE
+        SOCKET fd{ INVALID_SOCKET };
+        // either STATE_REQUEST or STATE_RESPONSE
+        uint32_t state{ 0 }; 
         // buffer for reading
-        size_t rbuff_size = 0;
+        size_t rbuff_size{ 0 };
         uint8_t rbuff[4 + kMaxMsg];
         // buffer for writing
-        size_t wbuff_size = 0;
-        size_t wbuff_sent = 0;
+        size_t wbuff_size{ 0 };
+        size_t wbuff_sent{ 0 };
         uint8_t wbuff[4 + kMaxMsg];
         // timer
-        uint64_t idle_start = 0;
+        uint64_t idle_start{ 0 };
         // each connection has their own idleList
         DList idleList;
     }Conn;
@@ -85,6 +88,8 @@ private:
         DList idleList; 
         // timers for TTL
         Heap heap;
+        // the thread pool
+        ThreadPool tp{ 4 };
     } gData;
 
     static gData gdata_;
@@ -95,10 +100,10 @@ private:
         HNode node;
         std::string key;
         std::string val;
-        uint32_t type = 0;
-        ZSet* zset = NULL;
+        uint32_t type{ 0 };
+        ZSet* zset{ nullptr };
         // for TTLs
-        size_t heapIdx = -1;
+        size_t heapIdx{ static_cast<size_t>(-1) };
     }Entry;
 
 private:
@@ -145,7 +150,9 @@ private:
     static void DoSet(std::vector<std::string>& cmd, std::string& out);
     static void DoDel(std::vector<std::string>& cmd, std::string& out);
     static void DoRequest(std::vector<std::string>& cmd, std::string& out);
+    static void EntryDeleteAsync(void* arg);
     static void EntryDelete(Entry* ent);
+    static void EntryDestroy(Entry* ent);
     static void DoZadd(std::vector<std::string>& cmd, std::string& out);
     static bool ExpectZset(std::string& out, std::string& s, Entry** ent);
     static void DoZrem(std::vector<std::string>& cmd, std::string& out);

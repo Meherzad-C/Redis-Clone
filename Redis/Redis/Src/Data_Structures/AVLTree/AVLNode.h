@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// AVLNode for AVLTree
 class AVLNode 
 {
 public:

@@ -10,6 +10,7 @@
 #include "..\SortedSet\ZNode.h"
 #include "..\..\Common\Utility.h"
 
+// A Composite Data Structure
 class ZSet 
 {
 private:
@@ -25,6 +26,7 @@ private:
     void ZTree_Dispose(AVLNode* node);
 
 public:
+    const HMap& GetHashMapReference() const;
     bool Add(const char* name, size_t len, double score);
     ZNode* Lookup(const char* name, size_t len);
     ZNode* Pop(const char* name, size_t len);

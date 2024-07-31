@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "HashNode.h"
 
-// a simple fixed-sized hashtable
+// A simple fixed-sized Hashtable
 class HTable 
 {
 public:

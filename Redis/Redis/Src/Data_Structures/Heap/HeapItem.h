@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 
+// Underlying vector for Heap
 class HeapItem 
 {
 public:

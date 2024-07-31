@@ -932,7 +932,36 @@ void TCP_Server::DoRequest(std::vector<std::string>& cmd, std::string& out)
 	}
 }
 
+void TCP_Server::EntryDeleteAsync(void* arg)
+{
+	EntryDestroy((Entry*)arg);
+}
+
 void TCP_Server::EntryDelete(Entry* ent) 
+{
+	EntrySetTTL(ent, -1);
+
+	const size_t kLargeContainerSize = 10000;
+	bool tooBig = false;
+
+	switch (ent->type) 
+	{
+		case T_ZSET:
+			tooBig = ent->zset->GetHashMapReference().HM_Size() > kLargeContainerSize;
+			break;
+	}
+
+	if (tooBig) 
+	{
+		gdata_.tp.Enqueue(&EntryDeleteAsync, ent);
+	}
+	else 
+	{
+		EntryDestroy(ent);
+	}
+}
+
+void TCP_Server::EntryDestroy(Entry* ent)
 {
 	switch (ent->type) 
 	{
@@ -941,7 +970,6 @@ void TCP_Server::EntryDelete(Entry* ent)
 			delete ent->zset;
 			break;
 	}
-	EntrySetTTL(ent, -1);
 	delete ent;
 }
 

@@ -154,7 +154,7 @@
     <ClInclude Include="Src\Data_Structures\LinkedList\Linkedlist.h" />
     <ClInclude Include="Src\Data_Structures\SortedSet\ZNode.h" />
     <ClInclude Include="Src\Data_Structures\SortedSet\ZSet.h" />
-    <ClInclude Include="Src\Modules\Concurrency\Threadpool.h" />
+    <ClInclude Include="Src\Modules\Concurrency\ThreadPool.h" />
     <ClInclude Include="Src\TCP_Server.h" />
   </ItemGroup>
   <ItemGroup>
@@ -171,7 +171,7 @@
     <ClCompile Include="Src\Data_Structures\LinkedList\Linkedlist.cpp" />
     <ClCompile Include="Src\Data_Structures\SortedSet\ZNode.cpp" />
     <ClCompile Include="Src\Data_Structures\SortedSet\ZSet.cpp" />
-    <ClCompile Include="Src\Modules\Concurrency\Threadpool.cpp" />
+    <ClCompile Include="Src\Modules\Concurrency\ThreadPool.cpp" />
     <ClCompile Include="Src\TCP_Server.cpp" />
     <ClCompile Include="TestCases\Test_AVLTree.cpp" />
     <ClCompile Include="TestCases\Test_Heap.cpp" />

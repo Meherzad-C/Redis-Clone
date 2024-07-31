@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-// hashtable node, will be embedded into the payload
+// Hashtable node. It will be embedded into the payload
 class HNode 
 {
 public:

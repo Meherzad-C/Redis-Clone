@@ -2,7 +2,12 @@
 #include <cstdint>
 #include <string>
 
-// Get the address of the containing structure from a pointer to one of its members
+// ****************************************************
+// Common Utility functions are thrown in this file
+// ****************************************************
+
+// Get the address of the containing structure 
+// from a pointer to one of its members
 #define CONTAINER_OF(ptr, type, member) \
     (reinterpret_cast<type*>( \
         reinterpret_cast<char*>(ptr) - offsetof(type, member) \
